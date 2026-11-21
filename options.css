@@ -1,0 +1,335 @@
+/* Colours follow the Steam client and store: dark blue backgrounds, light blue accents, green purchase buttons */
+:root {
+	color-scheme: dark;
+	--bg: #1b2838;
+	--bg-top: #171a21;
+	--panel: rgba(0, 0, 0, 0.2);
+	--panel-border: rgba(255, 255, 255, 0.06);
+	--text: #c7d5e0;
+	--text-strong: #fff;
+	--muted: #8f98a0;
+	--accent: #66c0f4;
+	--accent-dim: rgba(102, 192, 244, 0.2);
+	--key-bg: #32404e;
+	--key-border: #101822;
+	--danger: #ff7b6b;
+	--notice: rgba(102, 192, 244, 0.08);
+	--green-from: #75b022;
+	--green-to: #588a1b;
+	--green-text: #d2efa9;
+	--green-hover-from: #8ed629;
+	--green-hover-to: #6aa621;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-width: 360px;
+	min-height: 100vh;
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font: 14px/1.45 "Motiva Sans", "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* Header with tabs */
+
+.topbar {
+	padding: 16px 16px 0;
+	background: linear-gradient(to bottom, var(--bg-top) 0%, #1f2d3d 100%);
+	border-bottom: 1px solid #000;
+}
+
+.topbar h1 {
+	margin: 0 0 2px;
+	color: var(--text-strong);
+	font-size: 17px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+}
+
+.tabs {
+	display: flex;
+	gap: 4px;
+	margin-top: 12px;
+}
+
+.tabs [role="tab"] {
+	padding: 8px 14px;
+	background: none;
+	border: none;
+	border-bottom: 3px solid transparent;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.tabs [role="tab"]:hover {
+	color: var(--text-strong);
+}
+
+.tabs [role="tab"][aria-selected="true"] {
+	color: var(--accent);
+	border-bottom-color: var(--accent);
+}
+
+/* Content */
+
+main {
+	flex: 1;
+	width: 100%;
+	max-width: 520px;
+	margin: 0 auto;
+	padding: 4px 16px 16px;
+}
+
+h2 {
+	margin: 18px 0 8px;
+	color: var(--muted);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+p {
+	margin: 0;
+}
+
+p + p {
+	margin-top: 8px;
+}
+
+strong {
+	color: var(--text-strong);
+	font-weight: 600;
+}
+
+.muted {
+	color: var(--muted);
+}
+
+.small {
+	font-size: 12px;
+}
+
+.panel,
+.shortcuts,
+.toggle {
+	background: var(--panel);
+	border: 1px solid var(--panel-border);
+	border-radius: 3px;
+}
+
+.panel {
+	padding: 12px;
+}
+
+.notice {
+	background: var(--notice);
+	border-left: 3px solid var(--accent);
+}
+
+/* Shortcut list */
+
+.shortcuts {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+}
+
+.row + .row {
+	border-top: 1px solid var(--panel-border);
+}
+
+.row-text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.row-name {
+	color: var(--text-strong);
+}
+
+.row-controls {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.row-error {
+	flex-basis: 100%;
+	color: var(--danger);
+}
+
+button {
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+/* Keycap */
+.key {
+	min-width: 100px;
+	padding: 5px 10px;
+	background: linear-gradient(to bottom, #3d4c5b 0%, var(--key-bg) 100%);
+	border: 1px solid var(--key-border);
+	border-radius: 3px;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 0 var(--key-border);
+	color: var(--text-strong);
+	font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+	font-size: 13px;
+	text-align: center;
+}
+
+.key:hover {
+	background: linear-gradient(to bottom, #47596b 0%, #3a4a5b 100%);
+}
+
+.key.off {
+	color: var(--muted);
+	font-family: inherit;
+	font-style: italic;
+}
+
+.key.recording {
+	background: linear-gradient(to right, #47bfff 0%, #1a44c2 100%);
+	border-color: #1a44c2;
+	color: #fff;
+	font-family: inherit;
+}
+
+.clear {
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	background: none;
+	border: none;
+	border-radius: 3px;
+	color: var(--muted);
+	font-size: 18px;
+	line-height: 1;
+}
+
+.clear:hover {
+	background: var(--accent-dim);
+	color: var(--text-strong);
+}
+
+.clear:disabled {
+	visibility: hidden;
+}
+
+kbd {
+	padding: 0 4px;
+	background: var(--key-bg);
+	border: 1px solid var(--key-border);
+	border-radius: 3px;
+	color: var(--text);
+	font-family: ui-monospace, Consolas, monospace;
+	font-size: 11px;
+}
+
+.toggle {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	cursor: pointer;
+}
+
+.toggle input {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	accent-color: var(--accent);
+}
+
+.actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 18px;
+}
+
+/* Steam's dark blue button */
+.btn-steam {
+	flex-shrink: 0;
+	padding: 6px 14px;
+	background: var(--accent-dim);
+	border: none;
+	border-radius: 2px;
+	color: var(--accent);
+	white-space: nowrap;
+}
+
+.btn-steam:hover {
+	background: linear-gradient(-60deg, #417a9b 5%, #67c1f5 95%);
+	color: #fff;
+}
+
+.status {
+	color: var(--muted);
+	font-size: 12px;
+}
+
+/* Footer with Steam's green purchase-style button */
+
+.bottombar {
+	display: flex;
+	justify-content: center;
+	padding: 12px 16px;
+	background: var(--bg-top);
+	border-top: 1px solid #000;
+}
+
+.btn-coffee {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 18px;
+	background: linear-gradient(to right, var(--green-from) 5%, var(--green-to) 95%);
+	border-radius: 2px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+	color: var(--green-text);
+	font-size: 14px;
+	text-decoration: none;
+	text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn-coffee:hover {
+	background: linear-gradient(to right, var(--green-hover-from) 5%, var(--green-hover-to) 95%);
+	color: #fff;
+}

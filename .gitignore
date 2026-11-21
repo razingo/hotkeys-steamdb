@@ -1,0 +1,13 @@
+# Packaged builds for the stores
+*.zip
+*.xpi
+*.crx
+*.pem
+dist/
+web-ext-artifacts/
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
