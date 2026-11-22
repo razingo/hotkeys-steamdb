@@ -4,6 +4,13 @@ A browser extension that adds keyboard shortcuts to the **Store**, **Wishlist**,
 
 Hover over a game, press a key, done. No more moving the mouse into the popup and overshooting it so it disappears.
 
+It only works on [steamdb.info](https://steamdb.info/). It does nothing on the Steam store or any other site.
+
+| With the [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension) and a linked Steam account | Without them |
+|:---:|:---:|
+| <img src="docs/popup-with-steamdb-extension.png" alt="SteamDB game popup with Store, Wishlist, Follow and Ignore buttons" width="280"> | <img src="docs/popup-without-steamdb-extension.png" alt="SteamDB game popup with only a Store button" width="280"> |
+| <kbd>S</kbd> <kbd>W</kbd> <kbd>F</kbd> <kbd>I</kbd> all work | Only <kbd>S</kbd> works |
+
 > [!NOTE]
 > This is an independent, unofficial project. It is **not affiliated with, endorsed by or sponsored by Steam, Valve Corporation or SteamDB.**
 
@@ -16,7 +23,7 @@ Hover over a game, press a key, done. No more moving the mouse into the popup an
 | <kbd>F</kbd> | Follow or unfollow |
 | <kbd>I</kbd> | Ignore or unignore |
 
-- Shortcuts only work while a game popup is open, and never while you're typing in a search box or other text field.
+- Shortcuts only work on steamdb.info while a game popup is open, and never while you're typing in a search box or other text field.
 - All shortcuts can be changed, including combinations such as <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Q</kbd>, or turned off.
 - Keys go by their physical position, so they work with any keyboard layout.
 - Each shortcut has a 1-second cooldown. Wishlist, Follow and Ignore share it, because each one sends a request to Steam and pressing keys quickly can get you temporarily blocked. A press during the cooldown is ignored and the button flashes amber.
@@ -24,7 +31,11 @@ Hover over a game, press a key, done. No more moving the mouse into the popup an
 ## Requirements
 
 - Chrome, Edge, Brave, Opera or another Chromium-based browser, or Firefox 128 or newer.
-- The official [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension), signed in to the Steam store. Wishlist, Follow and Ignore are carried out by SteamDB's extension; this one only presses the buttons for you.
+- For Wishlist, Follow and Ignore:
+  - Your Steam account linked to SteamDB (**Sign in** on steamdb.info).
+  - The official [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension), and being signed in to the Steam store in the same browser.
+
+  steamdb.info only shows those buttons when SteamDB's extension is installed, and it carries them out; this one only presses the buttons for you. The Store shortcut works without either.
 
 ## Install
 
@@ -73,9 +84,9 @@ It also opens new tabs, but only for `https://store.steampowered.com/` pages.
 
 ## How it works
 
-SteamDB draws the popup itself, so the extension finds it by the button labels (Store, Wishlist, Follow, Ignore) rather than by the site's internal class names. When a shortcut is pressed while the popup is visible, it clicks the matching button, exactly as a mouse click would.
+SteamDB draws the popup itself, so the extension finds it by its visible text (the Store button and "Click to view screenshots", or all four button labels) rather than by the site's internal class names. When a shortcut is pressed while the popup is visible, it clicks the matching button, exactly as a mouse click would. A key whose button isn't in the popup is left alone.
 
-If SteamDB changes those labels, or shows them in another language, the shortcuts can stop working. Please [open an issue](https://github.com/razingo/steamdb-hotkeys/issues) if that happens.
+If SteamDB changes that text, or shows it in another language, the shortcuts can stop working. Please [open an issue](https://github.com/razingo/steamdb-hotkeys/issues) if that happens.
 
 | File | Purpose |
 |------|---------|
@@ -84,12 +95,13 @@ If SteamDB changes those labels, or shows them in another language, the shortcut
 | `content.js` | Runs on steamdb.info: finds the popup and handles the shortcuts |
 | `background.js` | Opens the store page in a new tab |
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
+| `docs/` | Screenshots for this README (not part of the extension) |
 
 ## Troubleshooting
 
 **"Extension error … is not valid JSON" on SteamDB.** This message comes from the SteamDB extension: Steam answered a Wishlist, Follow or Ignore request with an error page. It usually means Steam is temporarily blocking requests (too many in a short time, a VPN, or Steam maintenance). Wait a few minutes and try again. Clicking the button with the mouse gives the same error.
 
-**A key does nothing.** Make sure the popup is open and you're not typing in a text field. If it still doesn't work, the site may have changed its buttons; please open an issue.
+**A key does nothing.** Make sure you're on steamdb.info, the popup is open and you're not typing in a text field. If only <kbd>S</kbd> works, check that your Steam account is linked to SteamDB and the SteamDB extension is installed (see Requirements). If it still doesn't work, the site may have changed its buttons; please open an issue.
 
 ## Support
 

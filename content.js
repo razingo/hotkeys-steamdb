@@ -39,28 +39,42 @@
 
 	const Matches = ( el, action ) => LABELS[ action ].test( LabelOf( el ) );
 
-	// Finds the open popup: the smallest element that holds all four buttons.
+	// Text shown under the popup's screenshot, used to tell the popup apart from other "Store" links
+	const POPUP_HINT = /click to view screenshots/i;
+
+	// Finds the open popup, starting from its Store button. Wishlist, Follow and Ignore are optional:
+	// steamdb.info only shows them when the SteamDB extension is installed.
+	// Returns the buttons that are present, e.g. { store } or { store, wishlist, follow, ignore }.
 	const FindPopupButtons = () =>
 	{
 		const candidates = [ ...document.querySelectorAll( CLICKABLE ) ]
-			.filter( ( el ) => Matches( el, 'wishlist' ) && IsVisible( el ) );
+			.filter( ( el ) => Matches( el, 'store' ) && IsVisible( el ) );
 
 		// Prefer the most recently added one, popups are usually appended at the end of the page
-		for( const wishlist of candidates.reverse() )
+		for( const store of candidates.reverse() )
 		{
-			let container = wishlist.parentElement;
+			let container = store.parentElement;
 
-			for( let depth = 0; container && depth < 5; depth++, container = container.parentElement )
+			// The popup never is the whole page, so stop below <body>
+			for( let depth = 0; container && container !== document.body && depth < 6; depth++, container = container.parentElement )
 			{
 				const buttons = [ ...container.querySelectorAll( CLICKABLE ) ].filter( IsVisible );
-				const found = {};
 
-				for( const action of Object.keys( LABELS ) )
+				// Reached a container with another Store link, so we've walked out of the popup
+				if( buttons.some( ( el ) => el !== store && Matches( el, 'store' ) ) )
+				{
+					break;
+				}
+
+				const found = { store };
+
+				for( const action of [ 'wishlist', 'follow', 'ignore' ] )
 				{
 					found[ action ] = buttons.find( ( el ) => Matches( el, action ) );
 				}
 
-				if( found.store && found.wishlist && found.follow && found.ignore )
+				// innerText only has visible text, so script contents and hidden elements don't count
+				if( POPUP_HINT.test( container.innerText ) || ( found.wishlist && found.follow && found.ignore ) )
 				{
 					return found;
 				}
@@ -144,14 +158,13 @@
 			return;
 		}
 
-		const buttons = FindPopupButtons();
+		const button = FindPopupButtons()?.[ action ];
 
-		if( !buttons )
+		// No popup open, or this button isn't in it (e.g. Wishlist without the SteamDB extension): leave the key alone
+		if( !button )
 		{
 			return;
 		}
-
-		const button = buttons[ action ];
 
 		e.preventDefault();
 		e.stopPropagation();
