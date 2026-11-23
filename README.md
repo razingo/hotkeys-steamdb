@@ -98,7 +98,7 @@ If SteamDB changes that text, or shows it in another language, the shortcuts can
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
 | `icons/` | Extension icons (16, 32, 48 and 128 px) |
 | `docs/` | Screenshots for this README (not part of the extension) |
-| `store/` | Screenshots and promo tile for the browser stores (not part of the extension) |
+| `store/` | Screenshots, promo tile and [publishing guide](store/PUBLISHING.md) for the browser stores (not part of the extension) |
 | `build.ps1` | Builds the ZIP for the browser stores in `dist/`: `powershell -ExecutionPolicy Bypass -File build.ps1` |
 
 ## Troubleshooting
