@@ -1,13 +1,17 @@
 'use strict';
 
 // Shared by content.js and options.js
+//
+// Top-level names use `var`, not `const`: Firefox runs each content script file separately,
+// and a top-level `const` or `let` from one file can't be seen from the next, so content.js would fail.
+// `var` puts the name on the shared global object, which works in both Chrome and Firefox.
 
 /**
  * @typedef {{code: string, label: string, ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}} Shortcut
  * @typedef {{shortcuts: Record<string, Shortcut|null>, storeInBackground: boolean}} Settings
  */
 
-const SHORTCUT_ACTIONS = [
+var SHORTCUT_ACTIONS = [
 	{ id: 'store', name: 'Store', description: 'Open the Steam store page' },
 	{ id: 'wishlist', name: 'Wishlist', description: 'Add to or remove from wishlist' },
 	{ id: 'follow', name: 'Follow', description: 'Follow or unfollow' },
@@ -15,7 +19,7 @@ const SHORTCUT_ACTIONS = [
 ];
 
 /** @param {string} letter @returns {Shortcut} */
-const PlainKey = ( letter ) => ( {
+var PlainKey = ( letter ) => ( {
 	code: `Key${letter}`,
 	label: letter,
 	ctrl: false,
@@ -25,7 +29,7 @@ const PlainKey = ( letter ) => ( {
 } );
 
 /** @type {Settings} */
-const DEFAULT_SETTINGS = {
+var DEFAULT_SETTINGS = {
 	shortcuts: {
 		store: PlainKey( 'S' ),
 		wishlist: PlainKey( 'W' ),
@@ -35,20 +39,20 @@ const DEFAULT_SETTINGS = {
 	storeInBackground: true,
 };
 
-const ExtApi = globalThis.browser ?? globalThis.chrome;
+var ExtApi = globalThis.browser ?? globalThis.chrome;
 
-const MODIFIER_KEYS = new Set( [ 'Control', 'Alt', 'AltGraph', 'Shift', 'Meta', 'OS', 'CapsLock', 'Fn' ] );
+var MODIFIER_KEYS = new Set( [ 'Control', 'Alt', 'AltGraph', 'Shift', 'Meta', 'OS', 'CapsLock', 'Fn' ] );
 
-const IS_MAC = /Mac|iPhone|iPad/.test( navigator.platform || navigator.userAgent );
+var IS_MAC = /Mac|iPhone|iPad/.test( navigator.platform || navigator.userAgent );
 
 /** @returns {Settings} */
-const CloneDefaults = () => JSON.parse( JSON.stringify( DEFAULT_SETTINGS ) );
+var CloneDefaults = () => JSON.parse( JSON.stringify( DEFAULT_SETTINGS ) );
 
 /**
  * Reads settings and fills in anything missing with defaults.
  * @returns {Promise<Settings>}
  */
-const LoadSettings = async() =>
+var LoadSettings = async() =>
 {
 	const settings = CloneDefaults();
 
@@ -81,13 +85,13 @@ const LoadSettings = async() =>
 };
 
 /** @param {Settings} settings */
-const SaveSettings = ( settings ) => ExtApi.storage.sync.set( { settings } );
+var SaveSettings = ( settings ) => ExtApi.storage.sync.set( { settings } );
 
 /**
  * Human readable name for the key itself, independent of keyboard layout where possible.
  * @param {KeyboardEvent} e
  */
-const KeyLabel = ( e ) =>
+var KeyLabel = ( e ) =>
 {
 	if( /^Key[A-Z]$/.test( e.code ) )
 	{
@@ -116,7 +120,7 @@ const KeyLabel = ( e ) =>
  * @param {KeyboardEvent} e
  * @returns {Shortcut|null} null when only modifiers are held
  */
-const ShortcutFromEvent = ( e ) =>
+var ShortcutFromEvent = ( e ) =>
 {
 	if( MODIFIER_KEYS.has( e.key ) )
 	{
@@ -134,7 +138,7 @@ const ShortcutFromEvent = ( e ) =>
 };
 
 /** @param {Partial<Shortcut>} s */
-const ModifierNames = ( s ) =>
+var ModifierNames = ( s ) =>
 {
 	const parts = [];
 
@@ -162,10 +166,10 @@ const ModifierNames = ( s ) =>
 };
 
 /** @param {Shortcut|null} s */
-const FormatShortcut = ( s ) => s ? [ ...ModifierNames( s ), s.label ].join( ' + ' ) : '';
+var FormatShortcut = ( s ) => s ? [ ...ModifierNames( s ), s.label ].join( ' + ' ) : '';
 
 /** @param {Shortcut|null} a @param {Shortcut|null} b */
-const SameShortcut = ( a, b ) => !!a && !!b &&
+var SameShortcut = ( a, b ) => !!a && !!b &&
 	a.code === b.code &&
 	a.ctrl === b.ctrl &&
 	a.alt === b.alt &&
@@ -173,7 +177,7 @@ const SameShortcut = ( a, b ) => !!a && !!b &&
 	a.meta === b.meta;
 
 /** @param {KeyboardEvent} e @param {Shortcut|null} s */
-const EventMatches = ( e, s ) => !!s &&
+var EventMatches = ( e, s ) => !!s &&
 	e.code === s.code &&
 	e.ctrlKey === s.ctrl &&
 	e.altKey === s.alt &&
