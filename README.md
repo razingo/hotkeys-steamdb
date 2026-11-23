@@ -1,4 +1,4 @@
-# SteamDB popup hotkeys
+# Popup Hotkeys for SteamDB
 
 A browser extension that adds keyboard shortcuts to the **Store**, **Wishlist**, **Follow** and **Ignore** buttons in the game popup on [steamdb.info](https://steamdb.info/).
 
@@ -30,7 +30,7 @@ It only works on [steamdb.info](https://steamdb.info/). It does nothing on the S
 
 ## Requirements
 
-- Chrome, Edge, Brave, Opera or another Chromium-based browser, or Firefox 128 or newer.
+- Chrome, Edge, Brave, Opera or another Chromium-based browser, or Firefox 140 or newer.
 - For Wishlist, Follow and Ignore:
   - Your Steam account linked to SteamDB (**Sign in** on steamdb.info).
   - The official [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension), and being signed in to the Steam store in the same browser.
@@ -66,6 +66,7 @@ Click the extension's toolbar icon, or open its **Options** from the extensions 
 - **Turn a shortcut off:** press <kbd>Backspace</kbd> while it's waiting for a key, or click **×**.
 - **Store page:** choose whether it opens in a background tab or switches to it.
 - **Reset to defaults** restores S / W / F / I.
+- The **About** tab and the buttons at the bottom link to this repository and to Buy Me a Coffee.
 
 Settings save immediately, apply to open SteamDB tabs without reloading, and sync between your browsers if browser sync is on.
 
@@ -86,7 +87,7 @@ It also opens new tabs, but only for `https://store.steampowered.com/` pages.
 
 SteamDB draws the popup itself, so the extension finds it by its visible text (the Store button and "Click to view screenshots", or all four button labels) rather than by the site's internal class names. When a shortcut is pressed while the popup is visible, it clicks the matching button, exactly as a mouse click would. A key whose button isn't in the popup is left alone.
 
-If SteamDB changes that text, or shows it in another language, the shortcuts can stop working. Please [open an issue](https://github.com/razingo/steamdb-hotkeys/issues) if that happens.
+If SteamDB changes that text, or shows it in another language, the shortcuts can stop working. Please [open an issue](https://github.com/razingo/hotkeys-steamdb/issues) if that happens.
 
 | File | Purpose |
 |------|---------|
@@ -95,7 +96,10 @@ If SteamDB changes that text, or shows it in another language, the shortcuts can
 | `content.js` | Runs on steamdb.info: finds the popup and handles the shortcuts |
 | `background.js` | Opens the store page in a new tab |
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
+| `icons/` | Extension icons (16, 32, 48 and 128 px) |
 | `docs/` | Screenshots for this README (not part of the extension) |
+| `store/` | Screenshots and promo tile for the browser stores (not part of the extension) |
+| `build.ps1` | Builds the ZIP for the browser stores in `dist/`: `powershell -ExecutionPolicy Bypass -File build.ps1` |
 
 ## Troubleshooting
 

@@ -307,9 +307,19 @@ kbd {
 
 /* Footer with Steam's green purchase-style button */
 
+a {
+	color: var(--accent);
+}
+
+a:hover {
+	color: var(--text-strong);
+}
+
 .bottombar {
 	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
+	gap: 10px;
 	padding: 12px 16px;
 	background: var(--bg-top);
 	border-top: 1px solid #000;
@@ -331,5 +341,23 @@ kbd {
 
 .btn-coffee:hover {
 	background: linear-gradient(to right, var(--green-hover-from) 5%, var(--green-hover-to) 95%);
+	color: #fff;
+}
+
+/* Steam's dark blue secondary button, next to the green one */
+.btn-github {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 18px;
+	background: var(--accent-dim);
+	border-radius: 2px;
+	color: var(--accent);
+	font-size: 14px;
+	text-decoration: none;
+}
+
+.btn-github:hover {
+	background: linear-gradient(-60deg, #417a9b 5%, #67c1f5 95%);
 	color: #fff;
 }
