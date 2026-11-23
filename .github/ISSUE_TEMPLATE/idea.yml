@@ -1,0 +1,45 @@
+name: Idea
+description: Suggest a new shortcut, setting or improvement
+title: "[Idea]: "
+labels: [ "enhancement" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! This extension can only work with what's on steamdb.info: it presses buttons in SteamDB's game popup. Things the site itself would have to change are better suggested to [SteamDB](https://github.com/SteamDatabase/BrowserExtension/issues).
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What's your idea?
+      description: Describe what you'd like the extension to do.
+      placeholder: A shortcut that copies the game's App ID from the popup.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it help?
+      description: What are you trying to do, and what makes it slow or awkward today?
+      placeholder: I collect App IDs for a spreadsheet and keep having to open each game page.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: What does it relate to?
+      options:
+        - A new shortcut
+        - An existing shortcut
+        - The settings page
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, mockups, or other extensions that do something similar.
