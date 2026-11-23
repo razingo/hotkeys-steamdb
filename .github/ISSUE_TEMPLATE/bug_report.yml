@@ -1,0 +1,101 @@
+name: Bug report
+description: A shortcut doesn't work, or something else is broken
+title: "[Bug]: "
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Before you start, please check the basics:
+        - You're on **steamdb.info** and the game popup is open.
+        - Wishlist, Follow and Ignore need the [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension) and your Steam account linked to SteamDB (**Sign in** on steamdb.info).
+        - "Extension error … is not valid JSON" comes from the SteamDB extension, not this one. See [Troubleshooting](https://github.com/razingo/hotkeys-steamdb#troubleshooting).
+
+  - type: dropdown
+    id: shortcut
+    attributes:
+      label: Which shortcuts are affected?
+      multiple: true
+      options:
+        - Store
+        - Wishlist
+        - Follow
+        - Ignore
+        - None, it's something else (settings page, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+      placeholder: I hovered over a game on the Trending page and pressed W. Nothing happened.
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: SteamDB page
+      description: The address of the page where it happened.
+      placeholder: https://steamdb.info/charts/
+    validations:
+      required: true
+
+  - type: dropdown
+    id: steamdb-extension
+    attributes:
+      label: Is the SteamDB extension installed?
+      options:
+        - "Yes"
+        - "No"
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: linked-account
+    attributes:
+      label: Is your Steam account linked to SteamDB?
+      options:
+        - "Yes"
+        - "No"
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Firefox
+        - Edge
+        - Brave
+        - Opera
+        - Other Chromium-based browser
+    validations:
+      required: true
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      placeholder: "131.0"
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: Shown on the About tab of the extension's settings.
+      placeholder: 1.4.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or console errors
+      description: A screenshot of the popup helps if the site may have changed. Drag images into this box.
