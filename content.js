@@ -1,14 +1,17 @@
 'use strict';
 
 // Uses SHORTCUT_ACTIONS, LoadSettings, EventMatches and ExtApi from shared.js
+//
+// Runs on steamdb.info (buttons in the game popup) and on Steam store game pages (Steam's own buttons).
 
 ( async() =>
 {
 	let settings = await LoadSettings();
 
-	ExtApi.storage.onChanged.addListener( async( changes, area ) =>
+	// Settings live in sync or local storage depending on the sync switch, so react to both
+	ExtApi.storage.onChanged.addListener( async( changes ) =>
 	{
-		if( area === 'sync' && changes.settings )
+		if( changes.settings || changes.syncSettings )
 		{
 			settings = await LoadSettings();
 		}
@@ -84,6 +87,48 @@
 		return null;
 	};
 
+	// Steam's own buttons are divs and links styled as buttons
+	const STEAM_CLICKABLE = `${CLICKABLE}, [class*="btn"]`;
+
+	// Finds Wishlist, Follow and Ignore on a Steam store game page (store.steampowered.com/app/...).
+	// They're only shown when signed in to Steam. There's no Store button: you're already on the store.
+	const FindSteamStoreButtons = () =>
+	{
+		// The box under the game's header that holds these buttons
+		const container = document.querySelector( '.queue_actions_ctn' );
+
+		if( !container )
+		{
+			return null;
+		}
+
+		const candidates = [ ...container.querySelectorAll( STEAM_CLICKABLE ) ].filter( IsVisible );
+		const found = {};
+
+		for( const action of [ 'wishlist', 'follow', 'ignore' ] )
+		{
+			const matching = candidates.filter( ( el ) => Matches( el, action ) );
+
+			// Steam wraps each button in another element with "btn" in its class, so take the innermost match
+			found[ action ] = matching.find( ( el ) => !matching.some( ( other ) => other !== el && el.contains( other ) ) );
+		}
+
+		return found;
+	};
+
+	const IS_STEAM_STORE = location.hostname === 'store.steampowered.com';
+
+	/** @returns {Record<string, HTMLElement|undefined>|null} the buttons that can be pressed right now */
+	const FindButtons = () =>
+	{
+		if( IS_STEAM_STORE )
+		{
+			return settings.steamStorePages ? FindSteamStoreButtons() : null;
+		}
+
+		return FindPopupButtons();
+	};
+
 	const FLASH_OK = '#66c0f4';
 	const FLASH_COOLDOWN = '#e0a100';
 
@@ -94,7 +139,7 @@
 		setTimeout( () => el.style.outline = old, 300 );
 	};
 
-	// Wishlist, Follow and Ignore each send a request to the Steam store (through the SteamDB extension).
+	// Wishlist, Follow and Ignore each send a request to the Steam store (on steamdb.info, through the SteamDB extension).
 	// Pressing keys quickly can get you temporarily blocked by Steam, so these share one cooldown.
 	// The store shortcut has its own, so a double press doesn't open two tabs.
 	const COOLDOWN_MS = 1000;
@@ -158,9 +203,10 @@
 			return;
 		}
 
-		const button = FindPopupButtons()?.[ action ];
+		const button = FindButtons()?.[ action ];
 
-		// No popup open, or this button isn't in it (e.g. Wishlist without the SteamDB extension): leave the key alone
+		// No popup open, or this button isn't there (e.g. Wishlist without the SteamDB extension,
+		// or Store on Steam's own page): leave the key alone
 		if( !button )
 		{
 			return;

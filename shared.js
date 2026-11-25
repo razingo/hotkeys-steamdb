@@ -2,13 +2,16 @@
 
 // Shared by content.js and options.js
 //
+// Settings are stored under "settings" in storage.sync, or storage.local when the user turns sync off.
+// That choice is stored as "syncSettings" in storage.local.
+//
 // Top-level names use `var`, not `const`: Firefox runs each content script file separately,
 // and a top-level `const` or `let` from one file can't be seen from the next, so content.js would fail.
 // `var` puts the name on the shared global object, which works in both Chrome and Firefox.
 
 /**
  * @typedef {{code: string, label: string, ctrl: boolean, alt: boolean, shift: boolean, meta: boolean}} Shortcut
- * @typedef {{shortcuts: Record<string, Shortcut|null>, storeInBackground: boolean}} Settings
+ * @typedef {{shortcuts: Record<string, Shortcut|null>, storeInBackground: boolean, steamStorePages: boolean}} Settings
  */
 
 var SHORTCUT_ACTIONS = [
@@ -37,6 +40,8 @@ var DEFAULT_SETTINGS = {
 		ignore: PlainKey( 'I' ),
 	},
 	storeInBackground: true,
+	// Wishlist, Follow and Ignore also work on Steam store game pages
+	steamStorePages: true,
 };
 
 var ExtApi = globalThis.browser ?? globalThis.chrome;
@@ -58,13 +63,17 @@ var LoadSettings = async() =>
 
 	try
 	{
-		const stored = ( await ExtApi.storage.sync.get( 'settings' ) ).settings;
+		const area = await IsSyncEnabled() ? 'sync' : 'local';
+		const stored = ( await ExtApi.storage[ area ].get( 'settings' ) ).settings;
 
 		if( stored && typeof stored === 'object' )
 		{
-			if( typeof stored.storeInBackground === 'boolean' )
+			for( const option of [ 'storeInBackground', 'steamStorePages' ] )
 			{
-				settings.storeInBackground = stored.storeInBackground;
+				if( typeof stored[ option ] === 'boolean' )
+				{
+					settings[ option ] = stored[ option ];
+				}
 			}
 
 			for( const { id } of SHORTCUT_ACTIONS )
@@ -85,7 +94,36 @@ var LoadSettings = async() =>
 };
 
 /** @param {Settings} settings */
-var SaveSettings = ( settings ) => ExtApi.storage.sync.set( { settings } );
+var SaveSettings = async( settings ) =>
+{
+	const area = await IsSyncEnabled() ? 'sync' : 'local';
+	await ExtApi.storage[ area ].set( { settings } );
+};
+
+// Whether settings sync between browsers. This choice itself is stored locally, so each browser decides for itself.
+/** @returns {Promise<boolean>} */
+var IsSyncEnabled = async() =>
+{
+	try
+	{
+		const { syncSettings } = await ExtApi.storage.local.get( 'syncSettings' );
+		return syncSettings !== false;
+	}
+	catch
+	{
+		return true;
+	}
+};
+
+/**
+ * Turns sync on or off, and carries the current settings over so nothing changes for the user.
+ * @param {boolean} enabled @param {Settings} settings
+ */
+var SetSyncEnabled = async( enabled, settings ) =>
+{
+	await ExtApi.storage.local.set( { syncSettings: enabled } );
+	await SaveSettings( settings );
+};
 
 /**
  * Human readable name for the key itself, independent of keyboard layout where possible.

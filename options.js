@@ -5,10 +5,13 @@
 	const list = document.getElementById( 'shortcuts' );
 	const template = /** @type {HTMLTemplateElement} */ ( document.getElementById( 'shortcut-row' ) );
 	const storeInBackground = /** @type {HTMLInputElement} */ ( document.getElementById( 'store-in-background' ) );
+	const steamStorePages = /** @type {HTMLInputElement} */ ( document.getElementById( 'steam-store-pages' ) );
+	const syncSettings = /** @type {HTMLInputElement} */ ( document.getElementById( 'sync-settings' ) );
 	const resetButton = document.getElementById( 'reset' );
 	const status = document.getElementById( 'status' );
 
 	let settings = await LoadSettings();
+	syncSettings.checked = await IsSyncEnabled();
 
 	/** @type {string|null} id of the action currently waiting for a key */
 	let recording = null;
@@ -74,6 +77,7 @@
 		}
 
 		storeInBackground.checked = settings.storeInBackground;
+		steamStorePages.checked = settings.steamStorePages;
 	};
 
 	const StopRecording = () =>
@@ -209,6 +213,26 @@
 		Save();
 	} );
 
+	steamStorePages.addEventListener( 'change', () =>
+	{
+		settings.steamStorePages = steamStorePages.checked;
+		Save();
+	} );
+
+	syncSettings.addEventListener( 'change', async() =>
+	{
+		try
+		{
+			await SetSyncEnabled( syncSettings.checked, settings );
+			ShowStatus( syncSettings.checked ? 'Sync turned on' : 'Sync turned off' );
+		}
+		catch( error )
+		{
+			syncSettings.checked = !syncSettings.checked;
+			ShowStatus( `Could not change sync: ${error.message}` );
+		}
+	} );
+
 	resetButton.addEventListener( 'click', () =>
 	{
 		settings = CloneDefaults();
@@ -225,11 +249,12 @@
 	Render();
 
 	// Keep in sync if settings are changed in another window (e.g. popup and options tab both open)
-	ExtApi?.storage?.onChanged.addListener( async( changes, area ) =>
+	ExtApi?.storage?.onChanged.addListener( async( changes ) =>
 	{
-		if( area === 'sync' && changes.settings && !recording )
+		if( ( changes.settings || changes.syncSettings ) && !recording )
 		{
 			settings = await LoadSettings();
+			syncSettings.checked = await IsSyncEnabled();
 			Render();
 		}
 	} );

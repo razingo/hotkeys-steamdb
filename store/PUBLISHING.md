@@ -39,7 +39,7 @@ Covers Chrome, and also Brave, Opera and Vivaldi users, who install from the Chr
 ### 2. Upload the ZIP
 
 1. Click **New item**.
-2. Upload `dist/popup-hotkeys-for-steamdb-1.4.0.zip`.
+2. Upload `dist/popup-hotkeys-for-steamdb-<version>.zip`.
 
 The name, description, version and icon are read from the manifest.
 
@@ -106,7 +106,7 @@ Review usually takes a few days. You'll get an email with the result.
 
 1. Click **Submit a New Add-on**.
 2. Choose **On this site** (listed on addons.mozilla.org).
-3. Upload `dist/popup-hotkeys-for-steamdb-1.4.0.zip`.
+3. Upload `dist/popup-hotkeys-for-steamdb-<version>.zip`.
 4. Platforms: tick **Firefox** only. Leave **Firefox for Android** unticked: it hasn't been tested there.
 5. Wait for the automatic validation, then click **Continue**. Warnings can be read but don't block the upload; errors do.
 6. **Do you need to submit source code?** Answer **No**. The ZIP is the source code, with no minifier, bundler or build step that changes the code.
@@ -189,7 +189,7 @@ Edge users can already install from the Chrome Web Store, so this is optional.
 Used for Firefox's summary (max 250 characters) and Edge's short description.
 
 ```text
-Keyboard shortcuts for the game popup on steamdb.info: S opens the Steam store page in a background tab, W wishlists, F follows, I ignores. Unofficial, not affiliated with Steam or SteamDB.
+Keyboard shortcuts for the game popup on steamdb.info and for Steam store game pages: S opens the store page in a background tab, W wishlists, F follows, I ignores. Unofficial, not affiliated with Steam or SteamDB.
 ```
 
 ### Full description
@@ -211,14 +211,15 @@ Features
 • Shortcuts never fire while you're typing in a search box or other text field.
 • A short cooldown on Wishlist, Follow and Ignore stops you from accidentally sending Steam too many requests.
 • Choose whether the store page opens in the background or switches to it.
-• Settings sync between your browsers if browser sync is on.
+• Settings sync between your browsers if browser sync is on, or stay in one browser if you turn sync off.
 
 Requirements
-• Works only on steamdb.info.
-• Wishlist, Follow and Ignore need the official SteamDB extension and your Steam account linked to SteamDB. Without them, SteamDB's popup only shows the Store button, and only the S shortcut works.
+• Works on steamdb.info and on game pages of the Steam store (store.steampowered.com/app/...), where W, F and I press Steam's own buttons. Turn the Steam pages off in the settings if you prefer.
+• On steamdb.info, Wishlist, Follow and Ignore need the official SteamDB extension and your Steam account linked to SteamDB. Without them, SteamDB's popup only shows the Store button, and only the S shortcut works.
+• On the Steam store, you need to be signed in to Steam for its Wishlist, Follow and Ignore buttons to show.
 
 Privacy
-The extension collects no data and makes no network requests of its own. It only runs on steamdb.info, and only stores your shortcut settings.
+The extension collects no data and makes no network requests of its own. It only runs on steamdb.info and Steam store game pages, and only stores your shortcut settings.
 
 Open source (MIT): https://github.com/razingo/hotkeys-steamdb
 Report a bug or suggest an idea: https://github.com/razingo/hotkeys-steamdb/issues
@@ -231,7 +232,7 @@ This is an independent, unofficial extension. It is not affiliated with, endorse
 Chrome, Privacy tab.
 
 ```text
-Adds keyboard shortcuts to the Store, Wishlist, Follow and Ignore buttons in the game popup on steamdb.info, so users can use those buttons without clicking them.
+Adds keyboard shortcuts to the Store, Wishlist, Follow and Ignore buttons in the game popup on steamdb.info and on Steam store game pages, so users can use those buttons without clicking them.
 ```
 
 ### storage justification
@@ -239,15 +240,15 @@ Adds keyboard shortcuts to the Store, Wishlist, Follow and Ignore buttons in the
 Chrome, Privacy tab.
 
 ```text
-Saves the user's shortcut settings (which key triggers which button, and whether the store page opens in a background tab). Nothing else is stored.
+Saves the user's shortcut settings: which key triggers which button, whether the store page opens in a background tab, whether the shortcuts also work on Steam store pages, and whether these settings sync between the user's browsers. Nothing else is stored.
 ```
 
 ### Host permission justification
 
-Chrome, Privacy tab. The content script on steamdb.info counts as a host permission.
+Chrome, Privacy tab. The content script's sites count as host permissions.
 
 ```text
-The content script runs only on https://steamdb.info/* to listen for the shortcut keys and press the matching button in SteamDB's game popup. It doesn't read or send any page data. No other sites are accessed.
+The content script runs only on https://steamdb.info/* and https://store.steampowered.com/app/* (Steam store game pages) to listen for the shortcut keys and press the matching Store, Wishlist, Follow or Ignore button on the page. It doesn't read or send any page data. No other sites are accessed.
 ```
 
 ### Notes to reviewer
@@ -261,6 +262,8 @@ How to test:
 3. Press S: the game's Steam store page opens in a new background tab.
 
 W (Wishlist), F (Follow) and I (Ignore) only work when the official SteamDB extension is installed and a Steam account is linked to SteamDB; without them, SteamDB's popup only shows the Store button.
+
+On a Steam store game page (e.g. https://store.steampowered.com/app/730/), W, F and I press Steam's own Wishlist, Follow and Ignore buttons. Steam only shows them when signed in.
 
 Shortcuts can be changed by clicking the toolbar icon.
 

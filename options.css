@@ -270,11 +270,68 @@ kbd {
 	cursor: pointer;
 }
 
-.toggle input {
-	width: 16px;
-	height: 16px;
+.toggle > span {
+	flex: 1;
+}
+
+/* On/off switch: a checkbox with role="switch", drawn as a track with a sliding knob, placed after the text */
+.toggle input[role="switch"] {
+	appearance: none;
+	position: relative;
+	flex-shrink: 0;
+	order: 2;
+	width: 36px;
+	height: 20px;
 	margin: 0;
-	accent-color: var(--accent);
+	background: var(--key-bg);
+	border: 1px solid var(--key-border);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: background-color 0.15s, border-color 0.15s;
+}
+
+.toggle input[role="switch"]::before {
+	content: "";
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 14px;
+	height: 14px;
+	background: var(--muted);
+	border-radius: 50%;
+	transition: transform 0.15s, background-color 0.15s;
+}
+
+.toggle input[role="switch"]:checked {
+	background: var(--accent);
+	border-color: var(--accent);
+}
+
+.toggle input[role="switch"]:checked::before {
+	background: #fff;
+	transform: translateX(16px);
+}
+
+.toggle:hover input[role="switch"]:not(:checked) {
+	border-color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.toggle input[role="switch"],
+	.toggle input[role="switch"]::before {
+		transition: none;
+	}
+}
+
+.toggles {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.toggle-note {
+	display: block;
+	margin-top: 2px;
 }
 
 .actions {
