@@ -40,12 +40,21 @@ test( 'every file build.ps1 packages exists', () =>
 	}
 } );
 
-test( 'content scripts load shared.js first and only run on SteamDB and Steam store game pages', () =>
+test( 'content scripts load shared.js first and only run on SteamDB and the Steam store', () =>
 {
-	const [ script ] = manifest.content_scripts;
+	const [ script, steamPageClick ] = manifest.content_scripts;
 
 	expect( script.js ).toEqual( [ 'shared.js', 'content.js' ] );
-	expect( script.matches ).toEqual( [ 'https://steamdb.info/*', 'https://store.steampowered.com/app/*' ] );
+	expect( script.matches ).toEqual( [ 'https://steamdb.info/*', 'https://store.steampowered.com/*' ] );
+
+	// Clicks Steam's javascript: links from the page's own context
+	expect( steamPageClick ).toEqual( {
+		matches: [ 'https://store.steampowered.com/*' ],
+		js: [ 'steam-page-click.js' ],
+		run_at: 'document_idle',
+		world: 'MAIN',
+	} );
+	expect( manifest.content_scripts ).toHaveLength( 2 );
 	expect( manifest.permissions ).toEqual( [ 'storage' ] );
 	expect( manifest.host_permissions ).toBeUndefined();
 } );

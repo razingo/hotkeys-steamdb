@@ -23,30 +23,51 @@ const PressEach = async( page, keys ) =>
 	}
 };
 
-test( 'W, F and I press Steam\'s Wishlist, Follow and Ignore buttons', async( { page } ) =>
+test( 'W, E and R press Steam\'s Wishlist, Follow and Ignore buttons', async( { page } ) =>
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamStorePage() } );
-	await PressEach( page, [ 'KeyW', 'KeyF', 'KeyI' ] );
+	await PressEach( page, [ 'KeyW', 'KeyE', 'KeyR' ] );
 
-	expect( await Clicks( page ) ).toEqual( { wishlist: 1, unwishlist: 0, follow: 1, unfollow: 0, ignore: 1, unignore: 0 } );
+	expect( await Clicks( page ) ).toEqual( { wishlist: 1, unwishlist: 0, follow: 1, unfollow: 0, ignore: 1, unignore: 0, ignoreElsewhere: 0 } );
 	expect( await KeysSeenByPage( page ) ).toEqual( [] );
 } );
 
 test( 'pressing again undoes it: the shown button is the one pressed', async( { page } ) =>
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamStorePage( { wishlisted: true, following: true, ignored: true } ) } );
-	await PressEach( page, [ 'KeyW', 'KeyF', 'KeyI' ] );
+	await PressEach( page, [ 'KeyW', 'KeyE', 'KeyR' ] );
 
-	expect( await Clicks( page ) ).toEqual( { wishlist: 0, unwishlist: 1, follow: 0, unfollow: 1, ignore: 0, unignore: 1 } );
+	expect( await Clicks( page ) ).toEqual( { wishlist: 0, unwishlist: 1, follow: 0, unfollow: 1, ignore: 0, unignore: 1, ignoreElsewhere: 0 } );
 } );
 
-test( 'S is left alone: you\'re already on the store page', async( { page } ) =>
+test( 'T picks "Played on Another Platform" from the closed Ignore menu', async( { page } ) =>
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamStorePage() } );
-	await page.keyboard.press( 'KeyS' );
+	await page.keyboard.press( 'KeyT' );
+
+	expect( await Clicks( page ) ).toMatchObject( { ignore: 0, ignoreElsewhere: 1 } );
+	expect( await KeysSeenByPage( page ) ).toEqual( [] );
+
+	// Shares the cooldown with Wishlist, Follow and Ignore
+	await page.keyboard.press( 'KeyR' );
+	expect( ( await Clicks( page ) ).ignore ).toBe( 0 );
+} );
+
+test( 'T is left alone when there\'s no Ignore button', async( { page } ) =>
+{
+	await OpenWithContentScript( page, { url: URL, html: SteamStorePage( { signedIn: false } ) } );
+	await page.keyboard.press( 'KeyT' );
+
+	expect( await KeysSeenByPage( page ) ).toEqual( [ 'KeyT' ] );
+} );
+
+test( 'Q is left alone: you\'re already on the store page', async( { page } ) =>
+{
+	await OpenWithContentScript( page, { url: URL, html: SteamStorePage() } );
+	await page.keyboard.press( 'KeyQ' );
 
 	expect( await page.evaluate( () => window.__sentMessages ) ).toEqual( [] );
-	expect( await KeysSeenByPage( page ) ).toEqual( [ 'KeyS' ] );
+	expect( await KeysSeenByPage( page ) ).toEqual( [ 'KeyQ' ] );
 } );
 
 test( 'signed out: there are no buttons, so keys are left alone', async( { page } ) =>
@@ -61,9 +82,9 @@ test( 'keys are ignored while typing in Steam\'s search box', async( { page } ) 
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamStorePage() } );
 	await page.locator( '#store_nav_search_term' ).focus();
-	await page.keyboard.type( 'wfi' );
+	await page.keyboard.type( 'wer' );
 
-	expect( await page.locator( '#store_nav_search_term' ).inputValue() ).toBe( 'wfi' );
+	expect( await page.locator( '#store_nav_search_term' ).inputValue() ).toBe( 'wer' );
 	expect( await Clicks( page ) ).toMatchObject( { wishlist: 0, follow: 0, ignore: 0 } );
 } );
 

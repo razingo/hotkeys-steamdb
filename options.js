@@ -16,7 +16,7 @@
 	/** @type {string|null} id of the action currently waiting for a key */
 	let recording = null;
 
-	/** @type {Record<string, {key: HTMLButtonElement, clear: HTMLButtonElement, error: HTMLElement}>} */
+	/** @type {Record<string, {key: HTMLButtonElement, clear: HTMLButtonElement, error: HTMLElement, warning: HTMLElement}>} */
 	const rows = {};
 
 	let statusTimer = 0;
@@ -74,6 +74,12 @@
 			}
 
 			clear.disabled = !shortcut || isRecording;
+
+			// A shortcut the browser also uses works, but replaces the browser's action while it's active
+			const { warning } = rows[ id ];
+			const clash = isRecording ? null : BrowserShortcutFor( shortcut );
+			warning.textContent = clash ? `${FormatShortcut( shortcut )} is also the browser's shortcut to ${clash.does}. On SteamDB popups and the Steam store, it will do ${name} instead.` : '';
+			warning.hidden = !clash;
 		}
 
 		storeInBackground.checked = settings.storeInBackground;
@@ -92,6 +98,7 @@
 		const key = row.querySelector( '.key' );
 		const clear = row.querySelector( '.clear' );
 		const error = row.querySelector( '.row-error' );
+		const warning = row.querySelector( '.row-warning' );
 		const description = row.querySelector( '.row-description' );
 
 		row.querySelector( '.row-name' ).textContent = action.name;
@@ -130,7 +137,7 @@
 			Save();
 		} );
 
-		rows[ action.id ] = { key, clear, error };
+		rows[ action.id ] = { key, clear, error, warning };
 		list.append( row );
 	}
 
@@ -180,6 +187,15 @@
 		if( e.key === 'Tab' && noModifiers )
 		{
 			ShowError( id, 'Tab is needed to move around pages, pick another key.' );
+			StopRecording();
+			return;
+		}
+
+		const browserShortcut = BrowserShortcutFor( shortcut );
+
+		if( browserShortcut?.reserved )
+		{
+			ShowError( id, `${FormatShortcut( shortcut )} is the browser's shortcut to ${browserShortcut.does}, and browsers don't let extensions use it. Pick another key.` );
 			StopRecording();
 			return;
 		}

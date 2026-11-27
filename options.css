@@ -13,6 +13,7 @@
 	--key-bg: #32404e;
 	--key-border: #101822;
 	--danger: #ff7b6b;
+	--warning: #e8b64c;
 	--notice: rgba(102, 192, 244, 0.08);
 	--green-from: #75b022;
 	--green-to: #588a1b;
@@ -185,6 +186,15 @@ strong {
 .row-error {
 	flex-basis: 100%;
 	color: var(--danger);
+}
+
+.row-warning {
+	flex-basis: 100%;
+	color: var(--warning);
+}
+
+.row-warning::before {
+	content: "⚠ ";
 }
 
 button {

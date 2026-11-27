@@ -14,6 +14,7 @@ $files = @(
 	'background.js'
 	'content.js'
 	'shared.js'
+	'steam-page-click.js'
 	'options.html'
 	'options.css'
 	'options.js'

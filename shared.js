@@ -19,6 +19,7 @@ var SHORTCUT_ACTIONS = [
 	{ id: 'wishlist', name: 'Wishlist', description: 'Add to or remove from wishlist' },
 	{ id: 'follow', name: 'Follow', description: 'Follow or unfollow' },
 	{ id: 'ignore', name: 'Ignore', description: 'Ignore or unignore' },
+	{ id: 'ignoreElsewhere', name: 'Ignore: played elsewhere', description: 'Steam store pages only: ignore as played on another platform' },
 ];
 
 /** @param {string} letter @returns {Shortcut} */
@@ -34,13 +35,14 @@ var PlainKey = ( letter ) => ( {
 /** @type {Settings} */
 var DEFAULT_SETTINGS = {
 	shortcuts: {
-		store: PlainKey( 'S' ),
+		store: PlainKey( 'Q' ),
 		wishlist: PlainKey( 'W' ),
-		follow: PlainKey( 'F' ),
-		ignore: PlainKey( 'I' ),
+		follow: PlainKey( 'E' ),
+		ignore: PlainKey( 'R' ),
+		ignoreElsewhere: PlainKey( 'T' ),
 	},
 	storeInBackground: true,
-	// Wishlist, Follow and Ignore also work on Steam store game pages
+	// Shortcuts also work on the Steam store: game pages and store lists
 	steamStorePages: true,
 };
 
@@ -213,6 +215,110 @@ var SameShortcut = ( a, b ) => !!a && !!b &&
 	a.alt === b.alt &&
 	a.shift === b.shift &&
 	a.meta === b.meta;
+
+/**
+ * Common browser shortcuts, written as "Mod+Shift+KeyT", where Mod is Ctrl (Cmd on a Mac).
+ * Reserved ones are kept by the browser and never reach extensions; the others reach the page,
+ * so this extension's shortcut would replace what the browser does while it's active.
+ * @type {{keys: string, does: string, reserved?: boolean}[]}
+ */
+var BROWSER_SHORTCUTS = [
+	{ keys: 'Mod+KeyT', does: 'open a new tab', reserved: true },
+	{ keys: 'Mod+KeyN', does: 'open a new window', reserved: true },
+	{ keys: 'Mod+KeyW', does: 'close the tab', reserved: true },
+	{ keys: 'Mod+Shift+KeyT', does: 'reopen a closed tab', reserved: true },
+	{ keys: 'Mod+Shift+KeyN', does: 'open a private window', reserved: true },
+	{ keys: 'Mod+Shift+KeyP', does: 'open a private window in Firefox', reserved: true },
+	{ keys: 'Mod+Shift+KeyW', does: 'close the window', reserved: true },
+	{ keys: 'Mod+KeyQ', does: 'quit the browser', reserved: true },
+	{ keys: 'Ctrl+Tab', does: 'switch to the next tab', reserved: true },
+	{ keys: 'Ctrl+Shift+Tab', does: 'switch to the previous tab', reserved: true },
+	{ keys: 'Mod+KeyF', does: 'find in the page' },
+	{ keys: 'Mod+KeyG', does: 'find the next match' },
+	{ keys: 'Mod+KeyP', does: 'print' },
+	{ keys: 'Mod+KeyS', does: 'save the page' },
+	{ keys: 'Mod+KeyD', does: 'bookmark the page' },
+	{ keys: 'Mod+KeyR', does: 'reload the page' },
+	{ keys: 'Mod+Shift+KeyR', does: 'reload the page' },
+	{ keys: 'Mod+KeyL', does: 'go to the address bar' },
+	{ keys: 'Mod+KeyK', does: 'search the web' },
+	{ keys: 'Mod+KeyE', does: 'search the web' },
+	{ keys: 'Mod+KeyH', does: 'open your history' },
+	{ keys: 'Mod+KeyJ', does: 'open your downloads' },
+	{ keys: 'Mod+KeyU', does: 'view the page source' },
+	{ keys: 'Mod+KeyO', does: 'open a file' },
+	{ keys: 'Mod+KeyA', does: 'select all' },
+	{ keys: 'Mod+KeyC', does: 'copy' },
+	{ keys: 'Mod+KeyV', does: 'paste' },
+	{ keys: 'Mod+KeyX', does: 'cut' },
+	{ keys: 'Mod+KeyZ', does: 'undo' },
+	{ keys: 'Mod+KeyY', does: 'redo' },
+	{ keys: 'Mod+Shift+KeyZ', does: 'redo' },
+	{ keys: 'Mod+Shift+KeyI', does: 'open the developer tools' },
+	{ keys: 'Mod+Shift+KeyJ', does: 'open the console' },
+	{ keys: 'Mod+Shift+KeyC', does: 'inspect the page' },
+	{ keys: 'Mod+Shift+KeyB', does: 'show or hide the bookmarks bar' },
+	{ keys: 'Mod+Shift+KeyO', does: 'open your bookmarks' },
+	{ keys: 'Mod+Shift+Delete', does: 'clear browsing data' },
+	{ keys: 'Mod+Equal', does: 'zoom in' },
+	{ keys: 'Mod+Minus', does: 'zoom out' },
+	{ keys: 'Mod+Digit0', does: 'reset the zoom' },
+	...[ 1, 2, 3, 4, 5, 6, 7, 8, 9 ].map( ( n ) => ( { keys: `Mod+Digit${n}`, does: 'switch to a tab by number' } ) ),
+	{ keys: 'Alt+ArrowLeft', does: 'go back' },
+	{ keys: 'Alt+ArrowRight', does: 'go forward' },
+	{ keys: 'Alt+Home', does: 'open your home page' },
+	{ keys: 'Alt+KeyD', does: 'go to the address bar' },
+	{ keys: 'Alt+KeyF', does: 'open the browser menu' },
+	{ keys: 'F1', does: 'open help' },
+	{ keys: 'F3', does: 'find the next match' },
+	{ keys: 'F5', does: 'reload the page' },
+	{ keys: 'F6', does: 'go to the address bar' },
+	{ keys: 'F7', does: 'turn on caret browsing' },
+	{ keys: 'F10', does: 'open the browser menu' },
+	{ keys: 'F11', does: 'go full screen' },
+	{ keys: 'F12', does: 'open the developer tools' },
+	{ keys: 'Space', does: 'scroll down' },
+	{ keys: 'Shift+Space', does: 'scroll up' },
+	{ keys: 'PageUp', does: 'scroll up' },
+	{ keys: 'PageDown', does: 'scroll down' },
+	{ keys: 'Home', does: 'scroll to the top' },
+	{ keys: 'End', does: 'scroll to the bottom' },
+	{ keys: 'ArrowUp', does: 'scroll' },
+	{ keys: 'ArrowDown', does: 'scroll' },
+	{ keys: 'ArrowLeft', does: 'scroll' },
+	{ keys: 'ArrowRight', does: 'scroll' },
+	{ keys: 'Enter', does: 'open links and press buttons' },
+	{ keys: 'Slash', does: 'quick find in Firefox' },
+	{ keys: 'Quote', does: 'quick find in links in Firefox' },
+];
+
+/**
+ * The browser shortcut this would clash with, if any
+ * @param {Shortcut|null} s
+ * @returns {{keys: string, does: string, reserved?: boolean}|null}
+ */
+var BrowserShortcutFor = ( s ) =>
+{
+	if( !s )
+	{
+		return null;
+	}
+
+	return BROWSER_SHORTCUTS.find( ( { keys } ) =>
+	{
+		const parts = keys.split( '+' );
+		const code = parts.pop();
+		const mod = parts.includes( 'Mod' );
+		const ctrl = parts.includes( 'Ctrl' ) || ( mod && !IS_MAC );
+		const meta = mod && IS_MAC;
+
+		return s.code === code &&
+			s.ctrl === ctrl &&
+			s.meta === meta &&
+			s.shift === parts.includes( 'Shift' ) &&
+			s.alt === parts.includes( 'Alt' );
+	} ) ?? null;
+};
 
 /** @param {KeyboardEvent} e @param {Shortcut|null} s */
 var EventMatches = ( e, s ) => !!s &&
