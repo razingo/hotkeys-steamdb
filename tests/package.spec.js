@@ -70,6 +70,100 @@ test( 'version is a plain x.y.z number, as the stores require', () =>
 	expect( manifest.version ).toMatch( /^\d+\.\d+\.\d+$/ );
 } );
 
+// The links between files that nothing else would catch if one side changed
+
+const Read = ( file ) => fs.readFileSync( path.join( ROOT, file ), 'utf8' );
+
+test( 'every script and stylesheet options.html loads is packaged, with shared.js first', () =>
+{
+	const html = Read( 'options.html' );
+	const loaded = [ ...html.matchAll( /(?:src|href)="([\w.-]+\.(?:js|css))"/g ) ].map( ( match ) => match[ 1 ] );
+	const packaged = new Set( ExtensionFiles() );
+
+	for( const file of loaded )
+	{
+		expect( packaged.has( file ), `${file} is in the ZIP built by build.ps1` ).toBe( true );
+	}
+
+	// tabs.js and options.js both use names from shared.js
+	const scripts = loaded.filter( ( file ) => file.endsWith( '.js' ) );
+	expect( scripts[ 0 ] ).toBe( 'shared.js' );
+} );
+
+test( 'every element options.js and tabs.js look up exists in options.html', () =>
+{
+	const ids = new Set( [ ...Read( 'options.html' ).matchAll( /\bid="([\w-]+)"/g ) ].map( ( match ) => match[ 1 ] ) );
+
+	for( const file of [ 'options.js', 'tabs.js' ] )
+	{
+		for( const [ , id ] of Read( file ).matchAll( /getElementById\( '([\w-]+)' \)/g ) )
+		{
+			expect( ids.has( id ), `#${id} (used by ${file}) is in options.html` ).toBe( true );
+		}
+	}
+} );
+
+test( 'steam-page-click.js listens for every event content.js sends it', () =>
+{
+	const listens = [ ...Read( 'steam-page-click.js' ).matchAll( /addEventListener\( '(hotkeys-steamdb:[\w-]+)'/g ) ].map( ( match ) => match[ 1 ] );
+	const content = Read( 'content.js' );
+
+	// content.js sends "click" as is, and toggle-/capsule- followed by the action, for Wishlist and Ignore
+	expect( content ).toContain( "'hotkeys-steamdb:click'" );
+	expect( content ).toContain( '`hotkeys-steamdb:toggle-${action}`' );
+	expect( content ).toContain( '`hotkeys-steamdb:capsule-${action}`' );
+
+	expect( listens.sort() ).toEqual( [
+		'hotkeys-steamdb:capsule-ignore',
+		'hotkeys-steamdb:capsule-wishlist',
+		'hotkeys-steamdb:click',
+		'hotkeys-steamdb:toggle-ignore',
+		'hotkeys-steamdb:toggle-wishlist',
+	] );
+} );
+
+test( 'background.js handles the open-store message content.js sends', () =>
+{
+	const content = Read( 'content.js' );
+	const background = Read( 'background.js' );
+
+	expect( content ).toContain( "type: 'open-store', url: href, background:" );
+	expect( background ).toContain( "message.type !== 'open-store'" );
+	expect( background ).toContain( 'message.url' );
+	expect( background ).toContain( 'message.background' );
+} );
+
+test( 'every shortcut action has a default key and a cooldown group', () =>
+{
+	const shared = Read( 'shared.js' );
+	const actions = [ ...shared.match( /var SHORTCUT_ACTIONS = \[([\s\S]*?)\];/ )[ 1 ].matchAll( /id: '(\w+)'/g ) ].map( ( match ) => match[ 1 ] );
+	const defaults = [ ...shared.match( /shortcuts: \{([\s\S]*?)\},/ )[ 1 ].matchAll( /(\w+): PlainKey/g ) ].map( ( match ) => match[ 1 ] );
+	const cooldowns = [ ...Read( 'content.js' ).match( /const COOLDOWN_GROUP = \{([\s\S]*?)\};/ )[ 1 ].matchAll( /(\w+):/g ) ].map( ( match ) => match[ 1 ] );
+
+	expect( defaults.sort() ).toEqual( [ ...actions ].sort() );
+	expect( cooldowns.sort() ).toEqual( [ ...actions ].sort() );
+} );
+
+test( 'the changelog and the bug report form have the manifest\'s version', () =>
+{
+	expect( Read( 'CHANGELOG.md' ).match( /^## (\d+\.\d+\.\d+)/m )[ 1 ] ).toBe( manifest.version );
+	expect( Read( '.github/ISSUE_TEMPLATE/bug_report.yml' ).match( /placeholder: (\d+\.\d+\.\d+)/ )[ 1 ] ).toBe( manifest.version );
+} );
+
+test( 'the README sections the issue forms link to exist', () =>
+{
+	const headings = new Set( [ ...Read( 'README.md' ).matchAll( /^#+ (.+)$/gm ) ]
+		.map( ( match ) => match[ 1 ].toLowerCase().replace( /[^\w\s-]/g, '' ).trim().replace( /\s+/g, '-' ) ) );
+
+	for( const form of [ 'bug_report.yml', 'idea.yml' ] )
+	{
+		for( const [ , anchor ] of Read( `.github/ISSUE_TEMPLATE/${form}` ).matchAll( /hotkeys-steamdb#([\w-]+)/g ) )
+		{
+			expect( headings.has( anchor ), `#${anchor} (linked from ${form}) is a README heading` ).toBe( true );
+		}
+	}
+} );
+
 // Firefox runs each content script file separately: a top-level const or let in shared.js
 // can't be seen from content.js, which then stops working (this happened before 1.5.0)
 test( 'shared.js declares its top-level names with var, so Firefox content scripts can see them', () =>

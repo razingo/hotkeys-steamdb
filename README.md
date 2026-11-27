@@ -118,19 +118,44 @@ On Steam store game pages, it looks for buttons labelled Wishlist, Follow and Ig
 
 If SteamDB or Steam change that text, or show it in another language, the shortcuts can stop working. Please [open an issue](https://github.com/razingo/hotkeys-steamdb/issues) if that happens.
 
+### Files
+
+The extension (everything that goes into the ZIP):
+
 | File | Purpose |
 |------|---------|
 | `manifest.json` | Extension manifest (Manifest V3, Chrome and Firefox) |
-| `shared.js` | Default shortcuts, settings storage and key matching, used by both scripts below |
+| `shared.js` | Shortcut list, default keys, settings storage and key matching. Used by `content.js`, `options.js` and `tabs.js` |
 | `content.js` | Runs on steamdb.info and the Steam store: finds the buttons and handles the shortcuts |
-| `steam-page-click.js` | Runs in the Steam store page's own context and clicks Steam's buttons for `content.js` |
+| `steam-page-click.js` | Runs in the Steam store page's own context and does the clicking for `content.js` |
 | `background.js` | Opens the store page in a new tab |
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
 | `icons/` | Extension icons (16, 32, 48 and 128 px) |
-| `docs/` | Screenshots for this README (not part of the extension) |
-| `build.ps1` | Builds the ZIP for the browser stores in `dist/` and removes older builds there: `powershell -ExecutionPolicy Bypass -File build.ps1` |
-| `tests/`, `playwright.config.js`, `package.json` | Automated tests (not part of the extension) |
-| `CHANGELOG.md` | What changed in each version |
+| `LICENSE` | MIT license |
+
+Around it (not part of the extension):
+
+| File | Purpose |
+|------|---------|
+| `README.md`, `CHANGELOG.md` | This page, and what changed in each version |
+| `docs/` | Screenshots for this README |
+| `build.ps1` | Builds the ZIP for the browser stores in `dist/` and removes older builds there |
+| `tests/`, `playwright.config.js`, `package.json`, `package-lock.json` | Automated tests and the exact versions of the test tools |
+| `.github/` | The bug report and idea forms, and the workflow that runs the tests on GitHub |
+| `.gitignore`, `.gitattributes` | Keep builds and test output out of git, and line endings consistent |
+
+### How the files depend on each other
+
+- **`manifest.json`** loads `shared.js` before `content.js` on both sites (`content.js` needs names from `shared.js`), and `steam-page-click.js` on the Steam store only, in the page's own context. It also points to `background.js`, `options.html` and the icons.
+- **`options.html`** loads `options.css`, then `shared.js`, `tabs.js` and `options.js`, in that order. `options.js` and `tabs.js` look up elements by id in `options.html`.
+- **`shared.js`** keeps its top-level names as `var`, not `const`, because Firefox runs each content script file separately and `content.js` couldn't see them otherwise.
+- **`content.js` and `steam-page-click.js`** talk through five page events: `hotkeys-steamdb:click`, `:toggle-wishlist`, `:toggle-ignore`, `:capsule-wishlist` and `:capsule-ignore`.
+- **`content.js` and `background.js`** talk through one message, `open-store`, to open a store page in a new tab.
+- **A new shortcut action** in `shared.js` needs a default key there, a cooldown group in `content.js`, and a way for `content.js` to find its button.
+- **`build.ps1`** has the list of files that go into the ZIP. `tests/helpers.js` reads the same list, so the tests check exactly what ships.
+- **The version** lives in `manifest.json`. The newest heading in `CHANGELOG.md` and the version example in the bug report form have to match it.
+
+`tests/package.spec.js` checks these links, so changing one side without the other fails the tests. The one it can't check is how `content.js` finds a new action's button; that needs its own tests on a mock page.
 
 ## Development
 
@@ -140,6 +165,14 @@ The extension itself has no dependencies or build step. The tests need [Node.js]
 npm install
 npx playwright install chromium firefox
 npm test
+```
+
+To build the ZIP and run Firefox's add-on validator on it, as GitHub does:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build.ps1
+Expand-Archive dist\popup-hotkeys-for-steamdb-*.zip dist\extension
+npm run lint
 ```
 
 The tests run the extension's scripts in Chromium and Firefox on mock SteamDB and Steam store pages, test the settings page, and load the packaged extension into Chromium. GitHub runs them, plus Firefox's add-on validator (`web-ext lint`), on every push.

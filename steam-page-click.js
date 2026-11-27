@@ -2,6 +2,8 @@
 
 // Runs in the Steam store page's own JavaScript context ("world": "MAIN" in the manifest), not the extension's.
 // content.js decides what to do and sends an event; this script does it the way the page itself would.
+// The events: hotkeys-steamdb:click, :toggle-wishlist, :toggle-ignore, :capsule-wishlist and :capsule-ignore.
+// If you add or rename one, change content.js too. tests/package.spec.js checks the two still match.
 // Pages could send these events themselves, but they can already do all of this on their own, so it gives them nothing new.
 
 // Wrapped so nothing is added to the page's own global variables

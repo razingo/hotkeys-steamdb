@@ -3,7 +3,7 @@
 const Api = globalThis.browser ?? globalThis.chrome;
 
 // Opens the store page in a new tab, by default without switching to it.
-// Only Steam store URLs are accepted.
+// Only Steam store URLs are accepted. content.js sends { type: 'open-store', url, background } from OpenStore().
 Api.runtime.onMessage.addListener( ( message, sender, sendResponse ) =>
 {
 	if( !message || message.type !== 'open-store' || !sender.tab )

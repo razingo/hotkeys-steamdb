@@ -10,6 +10,8 @@ $root = $PSScriptRoot
 $version = ( Get-Content -Raw -Encoding UTF8 ( Join-Path $root 'manifest.json' ) | ConvertFrom-Json ).version
 
 # Only what the extension loads, plus the license. README, docs/, build files and .git stay out.
+# tests/helpers.js reads this list too (so the tests check what really ships): keep one 'quoted' name per line.
+# A file the manifest or options.html loads has to be here, or the ZIP won't work. The tests check that.
 $files = @(
 	'manifest.json'
 	'background.js'

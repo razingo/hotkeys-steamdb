@@ -14,6 +14,8 @@
  * @typedef {{shortcuts: Record<string, Shortcut|null>, storeInBackground: boolean, steamStorePages: boolean}} Settings
  */
 
+// Adding an action here also needs a default key below, a cooldown group in content.js (COOLDOWN_GROUP) and
+// a way for content.js to find its button. tests/package.spec.js checks the first two.
 var SHORTCUT_ACTIONS = [
 	{ id: 'store', name: 'Store', description: 'Open the Steam store page' },
 	{ id: 'wishlist', name: 'Wishlist', description: 'Add to or remove from wishlist' },
