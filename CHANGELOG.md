@@ -2,9 +2,17 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.9
+## 1.6.0
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Changed
+
+- New description in the browser's extensions list. It now says the extension works on both steamdb.info and the Steam Store, and which key does what.
+
+## 1.5.9
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
 	"name": "Popup Hotkeys for SteamDB",
-	"version": "1.5.9",
-	"description": "Keyboard shortcuts for Store, Wishlist, Follow and Ignore in SteamDB's game popup and on Steam store pages. Unofficial.",
+	"version": "1.6.0",
+	"description": "Keyboard shortcuts for steamdb.info and the Steam Store: Q opens the store page, W wishlists, E follows, R ignores. Unofficial.",
 	"homepage_url": "https://github.com/razingo/hotkeys-steamdb",
 	"minimum_chrome_version": "111",
 	"icons":
