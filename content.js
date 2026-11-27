@@ -127,7 +127,9 @@
 
 	const STEAM_GAME_LINK = /^https:\/\/store\.steampowered\.com\/app\/(\d+)/;
 	const IS_STEAM_STORE = location.hostname === 'store.steampowered.com';
-	const PAGE_APP_ID = STEAM_GAME_LINK.exec( location.href )?.[ 1 ];
+
+	// Read on every key press: Steam's newer pages can change the address without reloading
+	const PageAppId = () => STEAM_GAME_LINK.exec( location.href )?.[ 1 ];
 
 	const Hovered = () => [ ...document.querySelectorAll( ':hover' ) ].pop();
 
@@ -137,8 +139,9 @@
 
 	const AppIdOf = ( link ) => link ? STEAM_GAME_LINK.exec( link.href )?.[ 1 ] : undefined;
 
-	// Games in Steam's older store sections carry data-ds-appid: rows in store lists (front page tabs, search results)
-	// and the recommendation boxes at the bottom of the front page ("Since you wish for ..."). For these,
+	// Games in Steam's older store sections carry data-ds-appid: rows in store lists (front page tabs, search results),
+	// recommendation rows ("Under 40 zł" and the like) and the recommendation boxes at the bottom of the front page
+	// ("Since you wish for ..."). For these,
 	// steam-page-click.js uses Steam's own wishlist and ignore functions, so Wishlist and Ignore toggle: they also
 	// remove from the wishlist and unignore, which the boxes' own buttons can't. Only when signed in to Steam.
 	const FindSteamDynamicItem = () =>
@@ -175,7 +178,6 @@
 		follow: /^(follow|following|unfollow)$/i,
 		ignore: /^(ignore|ignored|ignore game)$/i,
 	};
-
 
 	// A box under the mouse with its own Wishlist / Ignore buttons, like the recommendation on Steam's front page.
 	// Walks up from the mouse until it finds exactly one Wishlist button. It stops when it has clearly left the box:
@@ -298,7 +300,7 @@
 		const link = Hovered()?.closest( 'a[href]' );
 		const appid = AppIdOf( link );
 
-		if( !appid || appid === PAGE_APP_ID )
+		if( !appid || appid === PageAppId() )
 		{
 			return null;
 		}

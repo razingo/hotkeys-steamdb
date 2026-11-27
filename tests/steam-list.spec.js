@@ -81,6 +81,20 @@ test( 'keys are left alone when the mouse isn\'t over a game', async( { page } )
 	expect( await page.evaluate( () => window.__sentMessages ) ).toEqual( [] );
 } );
 
+test( 'when there\'s nothing to do, the amber flash doesn\'t leave the highlight stuck', async( { page } ) =>
+{
+	// No Steam wishlist functions and no options menu: the row flashes amber and nothing else happens
+	const html = SteamListPage( { dynamicStore: false } ).replaceAll( '<div class="ds_options"><div></div></div>', '' );
+	await OpenWithContentScript( page, { url: URL, html } );
+	const row = page.locator( '[data-ds-appid="111"]' );
+
+	await row.hover();
+	await page.keyboard.press( 'KeyW' );
+
+	await expect( row ).toHaveCSS( 'outline-style', 'none', { timeout: 1000 } );
+	await expect( row ).toHaveCSS( 'box-shadow', 'none', { timeout: 1000 } );
+} );
+
 test( 'signed out: W is left alone', async( { page } ) =>
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamListPage( { signedIn: false } ) } );

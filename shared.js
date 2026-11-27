@@ -64,44 +64,51 @@ var IsValidShortcut = ( s ) => s === null || ( !!s && typeof s === 'object' &&
 var CloneDefaults = () => JSON.parse( JSON.stringify( DEFAULT_SETTINGS ) );
 
 /**
- * Reads settings and fills in anything missing with defaults.
- * @returns {Promise<Settings>}
+ * Turns whatever was stored into complete settings: anything missing or broken gets its default.
+ * @returns {Settings}
  */
-var LoadSettings = async() =>
+var NormalizeSettings = ( stored ) =>
 {
 	const settings = CloneDefaults();
 
+	if( !stored || typeof stored !== 'object' )
+	{
+		return settings;
+	}
+
+	for( const option of [ 'storeInBackground', 'steamStorePages' ] )
+	{
+		if( typeof stored[ option ] === 'boolean' )
+		{
+			settings[ option ] = stored[ option ];
+		}
+	}
+
+	for( const { id } of SHORTCUT_ACTIONS )
+	{
+		// A broken entry keeps the default rather than showing up as "undefined" in the settings
+		if( stored.shortcuts && Object.hasOwn( stored.shortcuts, id ) && IsValidShortcut( stored.shortcuts[ id ] ) )
+		{
+			settings.shortcuts[ id ] = stored.shortcuts[ id ];
+		}
+	}
+
+	return settings;
+};
+
+/** @returns {Promise<Settings>} */
+var LoadSettings = async() =>
+{
 	try
 	{
 		const area = await IsSyncEnabled() ? 'sync' : 'local';
-		const stored = ( await ExtApi.storage[ area ].get( 'settings' ) ).settings;
-
-		if( stored && typeof stored === 'object' )
-		{
-			for( const option of [ 'storeInBackground', 'steamStorePages' ] )
-			{
-				if( typeof stored[ option ] === 'boolean' )
-				{
-					settings[ option ] = stored[ option ];
-				}
-			}
-
-			for( const { id } of SHORTCUT_ACTIONS )
-			{
-				// A broken entry keeps the default rather than showing up as "undefined" in the settings
-				if( stored.shortcuts && Object.hasOwn( stored.shortcuts, id ) && IsValidShortcut( stored.shortcuts[ id ] ) )
-				{
-					settings.shortcuts[ id ] = stored.shortcuts[ id ];
-				}
-			}
-		}
+		return NormalizeSettings( ( await ExtApi.storage[ area ].get( 'settings' ) ).settings );
 	}
 	catch( error )
 	{
 		console.error( '[Popup Hotkeys for SteamDB] Failed to load settings', error );
+		return CloneDefaults();
 	}
-
-	return settings;
 };
 
 /** @param {Settings} settings */
@@ -128,13 +135,19 @@ var IsSyncEnabled = async() =>
 
 /**
  * Turns sync on or off.
- * Off: this browser keeps its current settings, now stored locally.
- * On: if your other browsers already synced settings, this browser switches to those ("adopted"), so turning sync on
- * here never overwrites them. If nothing is synced yet, this browser's settings become the synced ones ("uploaded").
- * @param {boolean} enabled @param {Settings} settings
- * @returns {Promise<'kept'|'adopted'|'uploaded'>}
+ *
+ * Off: this browser keeps its current settings, now stored locally. Returns 'kept'.
+ *
+ * On: nothing is overwritten without asking.
+ * - Nothing synced yet: this browser's settings become the synced ones ('uploaded').
+ * - Synced settings are the same as this browser's: sync just turns on ('same').
+ * - They differ: sync stays off and this returns 'conflict', so the settings page can ask which to keep.
+ *   Call again with keep = 'this' (upload this browser's, 'uploaded') or 'synced' (switch to those, 'adopted').
+ *
+ * @param {boolean} enabled @param {Settings} settings @param {'this'|'synced'} [keep]
+ * @returns {Promise<'kept'|'uploaded'|'same'|'adopted'|'conflict'>}
  */
-var SetSyncEnabled = async( enabled, settings ) =>
+var SetSyncEnabled = async( enabled, settings, keep ) =>
 {
 	if( !enabled )
 	{
@@ -143,15 +156,23 @@ var SetSyncEnabled = async( enabled, settings ) =>
 	}
 
 	const { settings: synced } = await ExtApi.storage.sync.get( 'settings' );
-	await ExtApi.storage.local.set( { syncSettings: true } );
+	const hasSynced = !!synced && typeof synced === 'object';
+	const same = hasSynced && JSON.stringify( NormalizeSettings( synced ) ) === JSON.stringify( NormalizeSettings( settings ) );
 
-	if( synced && typeof synced === 'object' )
+	if( hasSynced && !same && !keep )
 	{
-		return 'adopted';
+		return 'conflict';
 	}
 
-	await ExtApi.storage.sync.set( { settings } );
-	return 'uploaded';
+	await ExtApi.storage.local.set( { syncSettings: true } );
+
+	if( !hasSynced || keep === 'this' )
+	{
+		await ExtApi.storage.sync.set( { settings } );
+		return 'uploaded';
+	}
+
+	return same ? 'same' : 'adopted';
 };
 
 /**

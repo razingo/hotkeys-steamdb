@@ -13,12 +13,14 @@ const Wait = ( ms ) => new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 // Same check as content.js, so both sides agree on which buttons are there (a fully transparent one isn't)
 const IsVisible = ( el ) => el.checkVisibility?.( { checkOpacity: true, checkVisibilityCSS: true } ) ?? true;
 
-// Shows an amber outline for a moment when there's nothing we can do, so the key press isn't silently lost
+// Shows an amber ring for a moment when there's nothing we can do, so the key press isn't silently lost.
+// content.js has just flashed the same element with an outline, so this uses a box shadow instead.
+// If both used the outline, whichever restored it last could bring back the other's colour for good.
 const FlashUnavailable = ( el ) =>
 {
-	const outline = el.style.outline;
-	el.style.outline = '2px solid #e0a100';
-	setTimeout( () => el.style.outline = outline, 300 );
+	const shadow = el.style.boxShadow;
+	el.style.boxShadow = '0 0 0 2px #e0a100';
+	setTimeout( () => el.style.boxShadow = shadow, 300 );
 };
 
 const VisibleOptions = ( selector ) => [ ...document.querySelectorAll( selector ) ].filter( IsVisible );

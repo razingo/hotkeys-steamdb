@@ -235,29 +235,59 @@
 		Save();
 	} );
 
-	syncSettings.addEventListener( 'change', async() =>
+	const syncChoice = document.getElementById( 'sync-choice' );
+
+	/** Turns sync on or off; keep says which settings win if the synced ones differ from this browser's */
+	const ChangeSync = async( enabled, keep ) =>
 	{
 		try
 		{
-			const result = await SetSyncEnabled( syncSettings.checked, settings );
+			const result = await SetSyncEnabled( enabled, settings, keep );
+
+			// Different settings on both sides: ask before replacing either. The switch stays on while asking.
+			if( result === 'conflict' )
+			{
+				syncChoice.hidden = false;
+				document.getElementById( 'sync-keep-this' ).focus();
+				return;
+			}
+
+			syncChoice.hidden = true;
+			syncSettings.checked = enabled;
 
 			if( result === 'adopted' )
 			{
 				settings = await LoadSettings();
 				Render();
-				ShowStatus( 'Sync turned on, using the settings from your other browsers' );
+				ShowStatus( 'Sync turned on, using the synced settings' );
 			}
 			else
 			{
-				ShowStatus( syncSettings.checked ? 'Sync turned on' : 'Sync turned off' );
+				ShowStatus( enabled ? 'Sync turned on' : 'Sync turned off' );
 			}
 		}
 		catch( error )
 		{
-			syncSettings.checked = !syncSettings.checked;
+			syncChoice.hidden = true;
+			syncSettings.checked = !enabled;
 			ShowStatus( `Could not change sync: ${error.message}` );
 		}
+	};
+
+	syncSettings.addEventListener( 'change', () =>
+	{
+		if( !syncSettings.checked && !syncChoice.hidden )
+		{
+			// Switched off again while we were asking: nothing was changed yet, so just stop asking
+			syncChoice.hidden = true;
+			return;
+		}
+
+		ChangeSync( syncSettings.checked );
 	} );
+
+	document.getElementById( 'sync-keep-this' ).addEventListener( 'click', () => ChangeSync( true, 'this' ) );
+	document.getElementById( 'sync-keep-synced' ).addEventListener( 'click', () => ChangeSync( true, 'synced' ) );
 
 	// Reset asks for a second click, so one stray click can't wipe out your own shortcuts
 	const RESET_LABEL = resetButton.textContent;
@@ -310,7 +340,13 @@
 		if( ( changes.settings || changes.syncSettings ) && !recording )
 		{
 			settings = await LoadSettings();
-			syncSettings.checked = await IsSyncEnabled();
+
+			// While asking which settings to keep, the switch shows "on" before sync really is, so leave it be
+			if( syncChoice.hidden )
+			{
+				syncSettings.checked = await IsSyncEnabled();
+			}
+
 			Render();
 		}
 	} );

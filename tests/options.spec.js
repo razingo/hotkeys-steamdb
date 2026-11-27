@@ -158,18 +158,71 @@ test( 'turning sync off keeps the settings, in this browser only', async( { page
 	expect( ( await StoredSync( page ) ).shortcuts.follow.code ).toBe( 'KeyE' );
 } );
 
-test( 'turning sync back on uses the settings your other browsers synced, instead of overwriting them', async( { page } ) =>
+test.describe( 'turning sync back on when the synced settings differ', () =>
 {
-	const local = { syncSettings: false, settings: SettingsWith( { shortcuts: { wishlist: Key( 'Z' ) } } ) };
-	const sync = { settings: SettingsWith( { shortcuts: { wishlist: Key( 'X' ) } } ) };
-	await OpenOptionsPage( page, { local, sync } );
+	// This browser has Z for Wishlist, the synced settings have X
+	const storage = {
+		local: { syncSettings: false, settings: SettingsWith( { shortcuts: { wishlist: Key( 'Z' ) } } ) },
+		sync: { settings: SettingsWith( { shortcuts: { wishlist: Key( 'X' ) } } ) },
+	};
 
-	await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'Z' );
+	test( 'asks first, and changes nothing until you choose', async( { page } ) =>
+	{
+		await OpenOptionsPage( page, storage );
+		await page.locator( '#sync-settings' ).check();
+
+		await expect( page.getByText( 'Your synced settings are different from this browser\'s' ) ).toBeVisible();
+		await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'Z' );
+		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( false );
+		expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
+	} );
+
+	test( '"Use this browser\'s" uploads this browser\'s settings', async( { page } ) =>
+	{
+		await OpenOptionsPage( page, storage );
+		await page.locator( '#sync-settings' ).check();
+		await page.getByRole( 'button', { name: 'Use this browser\'s' } ).click();
+
+		await expect( page.locator( '#sync-choice' ) ).toBeHidden();
+		await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'Z' );
+		await expect.poll( async() => ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyZ' );
+		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( true );
+	} );
+
+	test( '"Use synced" switches this browser to the synced settings', async( { page } ) =>
+	{
+		await OpenOptionsPage( page, storage );
+		await page.locator( '#sync-settings' ).check();
+		await page.getByRole( 'button', { name: 'Use synced' } ).click();
+
+		await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'X' );
+		await expect( page.locator( '#sync-settings' ) ).toBeChecked();
+		expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
+		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( true );
+	} );
+
+	test( 'switching it off again while it asks leaves sync off', async( { page } ) =>
+	{
+		await OpenOptionsPage( page, storage );
+		await page.locator( '#sync-settings' ).check();
+		await page.locator( '#sync-settings' ).uncheck();
+
+		await expect( page.locator( '#sync-choice' ) ).toBeHidden();
+		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( false );
+		expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
+	} );
+} );
+
+test( 'turning sync back on doesn\'t ask when the synced settings are the same', async( { page } ) =>
+{
+	const settings = SettingsWith( { shortcuts: { wishlist: Key( 'Z' ) } } );
+	await OpenOptionsPage( page, { local: { syncSettings: false, settings }, sync: { settings } } );
+
 	await page.locator( '#sync-settings' ).check();
 
-	await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'X' );
-	await expect( page.getByText( 'using the settings from your other browsers' ) ).toBeVisible();
-	expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
+	await expect( page.getByText( 'Sync turned on' ) ).toBeVisible();
+	await expect( page.locator( '#sync-choice' ) ).toBeHidden();
+	expect( ( await StoredLocal( page ) ).syncSettings ).toBe( true );
 } );
 
 test( 'turning sync back on uploads this browser\'s settings when nothing is synced yet', async( { page } ) =>

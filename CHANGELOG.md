@@ -2,9 +2,23 @@
 
 What changed in each version. The newest is at the top.
 
+## 1.5.1
+
+The first version for the browser stores. Bug fixes on top of 1.5.0.
+
+### Changed
+
+- Turning sync back on now asks which settings to keep when the synced ones differ from this browser's. Before, it switched to the synced ones and changes made while sync was off were lost.
+
+### Fixed
+
+- When a game on the Steam store couldn't be wishlisted or ignored at all, the blue highlight could stay on it.
+- On Steam pages that change their address without reloading, shortcuts could act as if you were still on the previous game's page.
+- Install instructions: Chrome needs an unzipped folder, not the ZIP.
+
 ## 1.5.0
 
-The first version for the browser stores. It brings the shortcuts to Steam's own store.
+Not published to the stores; available from GitHub. It brings the shortcuts to Steam's own store.
 
 ### New
 
@@ -21,7 +35,7 @@ The first version for the browser stores. It brings the shortcuts to Steam's own
 - **Browser-shortcut warning:** shortcuts the browser keeps for itself (such as Ctrl + T) are refused; common ones the extension would take over (such as Ctrl + F or Space) show a warning.
 - **New settings:**
   - "Also on the Steam store" turns all the Steam store shortcuts on or off.
-  - "Sync settings between your browsers" turns sync on or off, per browser. Turning it back on uses the settings your other browsers synced, so it never overwrites them.
+  - "Sync settings between your browsers" turns sync on or off, per browser.
 - The options are now on/off switches.
 - "Reset to defaults" asks for a second click, so a stray click can't wipe your shortcuts.
 

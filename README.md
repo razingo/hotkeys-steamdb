@@ -62,7 +62,7 @@ The extension isn't in the browser stores yet, so it's loaded from source.
 
 ### Chrome, Edge, Brave, Opera
 
-1. Download this repository (**Code → Download ZIP**) and unzip it, or clone it. If you cloned it and ran `npm install` for the tests, build the ZIP with `build.ps1` and load that instead: Chrome refuses folders with `node_modules` in them.
+1. Download this repository (**Code → Download ZIP**) and unzip it, or clone it. If you cloned it and ran `npm install` for the tests, Chrome won't load that folder because of `node_modules`. Build the ZIP with `build.ps1`, unzip it into a new, empty folder and load that folder instead.
 2. Open `chrome://extensions` (or `edge://extensions`).
 3. Turn on **Developer mode**.
 4. Click **Load unpacked** and choose the folder that contains `manifest.json`.
@@ -90,7 +90,7 @@ Click the extension's toolbar icon, or open its **Options** from the extensions 
 - **Browser shortcuts:** ones the browser keeps for itself, such as <kbd>Ctrl</kbd> + <kbd>T</kbd> or <kbd>Ctrl</kbd> + <kbd>W</kbd>, can't be used. Common ones such as <kbd>Ctrl</kbd> + <kbd>F</kbd> or <kbd>Space</kbd> can, but you'll see a warning: on SteamDB popups and the Steam store they do this extension's action instead of the browser's.
 - **Store page:** choose whether it opens in a background tab or switches to it.
 - **Also on the Steam store:** turn the shortcuts on Steam's own pages on or off.
-- **Sync settings between your browsers:** on by default, using your browser's sync when that's turned on. Turn it off to keep this browser's shortcuts to itself; the setting is per browser. Turning it back on switches this browser to the settings your other browsers synced, if there are any, so it never overwrites them.
+- **Sync settings between your browsers:** on by default, using your browser's sync when that's turned on. Turn it off to keep this browser's shortcuts to itself; the setting is per browser. When you turn it back on and the synced settings differ from this browser's, it asks which ones to keep.
 - **Reset to defaults** restores Q / W / E / R / T and the options above, except sync. It asks for a second click first.
 - The **About** tab and the buttons at the bottom link to this repository and to Buy Me a Coffee.
 

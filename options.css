@@ -364,6 +364,18 @@ kbd {
 	margin-top: 2px;
 }
 
+/* Asked when sync is turned back on and the synced settings differ from this browser's */
+.sync-choice {
+	margin-top: 6px;
+}
+
+.sync-choice-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 10px 0 8px;
+}
+
 .actions {
 	display: flex;
 	align-items: center;
