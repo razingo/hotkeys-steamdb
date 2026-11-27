@@ -47,22 +47,25 @@ test( 'plain letters and unusual combinations are fine', async( { page } ) =>
 	expect( await page.evaluate( () => BrowserShortcutFor( null ) ) ).toBeNull();
 } );
 
-test( 'Firefox-only shortcuts only count in Firefox', async( { page, browserName } ) =>
+test( 'Firefox-only shortcuts only count in Firefox, and shared ones say what they do in each browser', async( { page, browserName } ) =>
 {
 	const privateWindow = await Check( page, { code: 'KeyP', mod: true, shift: true } );
 
-	// Ctrl + Shift + N is taken in both, but does something else in each
+	// Ctrl + Shift + N and Ctrl + Shift + M are taken in both, but do something else in each
 	const shiftN = await Check( page, { code: 'KeyN', mod: true, shift: true } );
+	const shiftM = await Check( page, { code: 'KeyM', mod: true, shift: true } );
 
 	if( browserName === 'firefox' )
 	{
 		expect( privateWindow ).toMatchObject( { does: 'open a private window', reserved: true } );
 		expect( shiftN ).toMatchObject( { does: 'reopen a closed window', reserved: true } );
+		expect( shiftM ).toMatchObject( { does: 'open Responsive Design Mode' } );
 	}
 	else
 	{
 		expect( privateWindow ).toBeNull();
 		expect( shiftN ).toMatchObject( { does: 'open a private window', reserved: true } );
+		expect( shiftM ).toMatchObject( { does: 'switch to another profile' } );
 	}
 } );
 
@@ -117,9 +120,11 @@ test( 'on a Mac, Cmd + H, Cmd + M and Cmd + Q are refused, and warnings use the 
 	expect( await Check( page, { code: 'BracketLeft', mod: true } ) ).toMatchObject( { does: 'go back' } );
 	expect( await Check( page, { code: 'Comma', mod: true } ) ).toMatchObject( { does: 'open the settings' } );
 
-	// Windows-only keys aren't warned about on a Mac
+	// Windows-only keys aren't warned about on a Mac, function keys included (only F7 is in Chrome's Mac list)
 	expect( await Check( page, { code: 'KeyJ', mod: true } ) ).toBeNull();
 	expect( await Check( page, { code: 'ArrowLeft', alt: true } ) ).toBeNull();
+	expect( await Check( page, { code: 'F5' } ) ).toBeNull();
+	expect( await Check( page, { code: 'F7' } ) ).toMatchObject( { does: 'turn on caret browsing' } );
 } );
 
 test( 'elsewhere, Ctrl + H opens the history and Ctrl + M is free', async( { page } ) =>

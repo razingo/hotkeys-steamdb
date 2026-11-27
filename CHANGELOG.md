@@ -2,9 +2,21 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.8
+## 1.5.9
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- On a Mac, the settings page warned that the function keys F1, F3, F5, F6, F10, F11 and F12 do what they do on Windows, such as "reload the page" for F5. Chrome on a Mac doesn't use them, so there's no warning for them there now. F7 (caret browsing) still warns everywhere.
+
+### For developers
+
+- Tests for Delete turning a shortcut off, and for what Ctrl + Shift + M is called in Chrome and Firefox.
+
+## 1.5.8
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

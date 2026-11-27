@@ -102,7 +102,7 @@ body:
     attributes:
       label: Extension version
       description: Shown on the About tab of the extension's settings.
-      placeholder: 1.5.8
+      placeholder: 1.5.9
     validations:
       required: true
 

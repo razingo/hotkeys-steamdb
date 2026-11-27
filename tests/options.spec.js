@@ -143,7 +143,7 @@ test( 'shows the warning for stored shortcuts too', async( { page } ) =>
 	await expect( page.getByText( 'Space is also the browser\'s shortcut to scroll down.', { exact: false } ) ).toBeVisible();
 } );
 
-test( 'Escape cancels and Backspace turns a shortcut off', async( { page } ) =>
+test( 'Escape cancels, and Backspace or Delete turns a shortcut off', async( { page } ) =>
 {
 	await OpenOptionsPage( page );
 
@@ -155,6 +155,12 @@ test( 'Escape cancels and Backspace turns a shortcut off', async( { page } ) =>
 	await page.keyboard.press( 'Backspace' );
 	await expect( KeyButton( page, 'Follow' ) ).toHaveText( 'Off' );
 	expect( ( await StoredSync( page ) ).shortcuts.follow ).toBeNull();
+
+	// Delete does the same, as the settings page says
+	await KeyButton( page, 'Ignore' ).click();
+	await page.keyboard.press( 'Delete' );
+	await expect( KeyButton( page, 'Ignore' ) ).toHaveText( 'Off' );
+	await expect.poll( async() => ( await StoredSync( page ) ).shortcuts.ignore ).toBeNull();
 } );
 
 test( 'the × button turns a shortcut off', async( { page } ) =>
