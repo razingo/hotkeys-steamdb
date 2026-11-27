@@ -222,7 +222,30 @@ var KeyLabel = ( e ) =>
 		return 'Space';
 	}
 
+	// Dead keys (^ and ´ on a German keyboard, ' and ` on US International) don't type anything by themselves,
+	// so the browser calls them "Dead". Name them after the key at that spot on a US keyboard instead.
+	if( ( e.key === 'Dead' || e.key === 'Unidentified' ) && Object.hasOwn( PUNCTUATION_KEYS, e.code ) )
+	{
+		return PUNCTUATION_KEYS[ e.code ];
+	}
+
 	return e.key.length === 1 ? e.key.toUpperCase() : e.key;
+};
+
+/** What the punctuation keys type on a US keyboard, by their position */
+var PUNCTUATION_KEYS = {
+	Backquote: '`',
+	Minus: '-',
+	Equal: '=',
+	BracketLeft: '[',
+	BracketRight: ']',
+	Backslash: '\\',
+	IntlBackslash: '\\',
+	Semicolon: ';',
+	Quote: '\'',
+	Comma: ',',
+	Period: '.',
+	Slash: '/',
 };
 
 /**

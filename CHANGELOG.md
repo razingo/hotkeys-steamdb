@@ -2,9 +2,17 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.4
+## 1.5.5
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- On keyboards with dead keys, such as ^ and ´ on a German keyboard or ' and ` on US International, a shortcut on one of those keys was called "Dead" in the settings. It's now named after the key, for example ` (the shortcut itself always worked).
+
+## 1.5.4
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

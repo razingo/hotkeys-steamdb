@@ -87,7 +87,21 @@ test( 'refuses a key without a key code, which would be thrown away as broken wh
 
 	await expect( page.getByText( 'This key can\'t be used for a shortcut' ) ).toBeVisible();
 	await expect( KeyButton( page, 'Follow' ) ).toHaveText( 'E' );
-	expect( ( await StoredSync( page ) )?.shortcuts.follow.code ?? 'KeyE' ).toBe( 'KeyE' );
+
+	// Nothing was saved at all
+	expect( await StoredSync( page ) ).toBeUndefined();
+} );
+
+test( 'a dead key is named after its key, not "Dead"', async( { page } ) =>
+{
+	await OpenOptionsPage( page );
+
+	// The ^ key on a German keyboard
+	await KeyButton( page, 'Follow' ).click();
+	await page.evaluate( () => document.dispatchEvent( new KeyboardEvent( 'keydown', { key: 'Dead', code: 'Backquote', bubbles: true } ) ) );
+
+	await expect( KeyButton( page, 'Follow' ) ).toHaveText( '`' );
+	await expect.poll( async() => ( await StoredSync( page ) )?.shortcuts.follow ).toMatchObject( { code: 'Backquote', label: '`' } );
 } );
 
 test( 'refuses shortcuts the browser keeps for itself', async( { page } ) =>
