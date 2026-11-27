@@ -84,6 +84,20 @@ test.describe( 'steamdb.info popup with the SteamDB extension', () =>
 		expect( await SentMessages( page ) ).toEqual( [] );
 	} );
 
+	test( 'keys are ignored in any editable area, also plaintext-only ones and the elements inside them', async( { page } ) =>
+	{
+		await page.evaluate( () => document.body.insertAdjacentHTML( 'beforeend',
+			'<div id="plain" contenteditable="plaintext-only">x</div><div contenteditable><p id="inner" tabindex="0">y</p></div>' ) );
+
+		for( const id of [ 'plain', 'inner' ] )
+		{
+			await page.locator( `#${id}` ).focus();
+			await page.keyboard.press( 'KeyW' );
+		}
+
+		expect( ( await Clicks( page ) ).wishlist ).toBe( 0 );
+	} );
+
 	test( 'T (Steam store pages only) is left alone', async( { page } ) =>
 	{
 		await page.keyboard.press( 'KeyT' );

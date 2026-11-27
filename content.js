@@ -141,9 +141,9 @@
 
 	// Games in Steam's older store sections carry data-ds-appid: rows in store lists (front page tabs, search results),
 	// recommendation rows ("Under 40 zł" and the like) and the recommendation boxes at the bottom of the front page
-	// ("Since you wish for ..."). For these,
-	// steam-page-click.js uses Steam's own wishlist and ignore functions, so Wishlist and Ignore toggle: they also
-	// remove from the wishlist and unignore, which the boxes' own buttons can't. Only when signed in to Steam.
+	// ("Since you wish for ..."). For these, steam-page-click.js uses Steam's own wishlist and ignore functions, so
+	// Wishlist and Ignore toggle: they also remove from the wishlist and unignore, which the boxes' own buttons can't.
+	// Only when signed in to Steam.
 	const FindSteamDynamicItem = () =>
 	{
 		const hovered = Hovered();
@@ -436,8 +436,9 @@
 			return;
 		}
 
-		// Don't steal keys while typing in search boxes etc.
-		if( e.target instanceof Element && e.target.closest( 'input, textarea, select, [contenteditable=""], [contenteditable="true"]' ) )
+		// Don't steal keys while typing in search boxes etc. isContentEditable also covers
+		// contenteditable="plaintext-only" and elements inside an editable area.
+		if( e.target instanceof Element && ( e.target.closest( 'input, textarea, select' ) || ( e.target instanceof HTMLElement && e.target.isContentEditable ) ) )
 		{
 			return;
 		}

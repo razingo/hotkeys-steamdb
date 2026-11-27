@@ -184,9 +184,19 @@
 			return;
 		}
 
-		if( e.key === 'Tab' && noModifiers )
+		// Shift + Tab moves back the other way, so it's just as needed as Tab itself
+		if( e.key === 'Tab' && !e.ctrlKey && !e.altKey && !e.metaKey )
 		{
-			ShowError( id, 'Tab is needed to move around pages, pick another key.' );
+			ShowError( id, `${e.shiftKey ? 'Shift + Tab is' : 'Tab is'} needed to move around pages, pick another key.` );
+			StopRecording();
+			return;
+		}
+
+		// Some keys (on-screen keyboards, a few media keys) have no key code. Saved like that, the shortcut
+		// would be thrown away as broken next time the settings load, and quietly turn back into the default.
+		if( !shortcut.code )
+		{
+			ShowError( id, 'This key can\'t be used for a shortcut, pick another one.' );
 			StopRecording();
 			return;
 		}

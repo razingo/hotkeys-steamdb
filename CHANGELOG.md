@@ -2,9 +2,19 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.3
+## 1.5.4
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- Shift + Tab could be picked as a shortcut. It's what moves back through a page with the keyboard, so on Steam game pages that stopped working. It's now refused, like Tab.
+- A key the browser reports without a key code (some on-screen keyboards and media keys) could be picked as a shortcut, and then quietly turned back into the default the next time the settings loaded. It's now refused with a message.
+- Shortcuts no longer fire while you type in any editable area of a page, including the kinds the extension missed before.
+
+## 1.5.3
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

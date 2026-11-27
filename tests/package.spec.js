@@ -144,7 +144,7 @@ test( 'every shortcut action has a default key and a cooldown group', () =>
 	expect( cooldowns.sort() ).toEqual( [ ...actions ].sort() );
 } );
 
-test( 'the README lists the same default keys as shared.js', () =>
+test( 'the README and the bug report form list the same default keys as shared.js', () =>
 {
 	const shared = Read( 'shared.js' );
 	const readme = Read( 'README.md' );
@@ -156,6 +156,10 @@ test( 'the README lists the same default keys as shared.js', () =>
 
 	// "Reset to defaults restores Q / W / E / R / T"
 	expect( readme ).toContain( `restores ${defaults.join( ' / ' )}` );
+
+	// The bug report form's shortcut choices, such as "Store (Q)", in the same order
+	const form = [ ...Read( '.github/ISSUE_TEMPLATE/bug_report.yml' ).matchAll( /^\s+- "?[^\n(]+\((\w)\)"?$/gm ) ].map( ( match ) => match[ 1 ] );
+	expect( form ).toEqual( defaults );
 
 	// The settings page names the shortcuts instead of keys, so it stays right after you change them.
 	// Its notes shouldn't mention any default key as a word of its own, like the "W, E, R and T" it once had.

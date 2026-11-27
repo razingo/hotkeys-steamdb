@@ -67,6 +67,29 @@ test( 'refuses Tab', async( { page } ) =>
 	await expect( page.getByText( 'Tab is needed to move around pages' ) ).toBeVisible();
 } );
 
+test( 'refuses Shift + Tab too, it moves back the other way', async( { page } ) =>
+{
+	await OpenOptionsPage( page );
+
+	await KeyButton( page, 'Follow' ).click();
+	await page.keyboard.press( 'Shift+Tab' );
+
+	await expect( page.getByText( 'Shift + Tab is needed to move around pages' ) ).toBeVisible();
+	await expect( KeyButton( page, 'Follow' ) ).toHaveText( 'E' );
+} );
+
+test( 'refuses a key without a key code, which would be thrown away as broken when the settings load', async( { page } ) =>
+{
+	await OpenOptionsPage( page );
+
+	await KeyButton( page, 'Follow' ).click();
+	await page.evaluate( () => document.dispatchEvent( new KeyboardEvent( 'keydown', { key: 'Unidentified', code: '', bubbles: true } ) ) );
+
+	await expect( page.getByText( 'This key can\'t be used for a shortcut' ) ).toBeVisible();
+	await expect( KeyButton( page, 'Follow' ) ).toHaveText( 'E' );
+	expect( ( await StoredSync( page ) )?.shortcuts.follow.code ?? 'KeyE' ).toBe( 'KeyE' );
+} );
+
 test( 'refuses shortcuts the browser keeps for itself', async( { page } ) =>
 {
 	await OpenOptionsPage( page );
