@@ -134,6 +134,25 @@ var IsSyncEnabled = async() =>
 };
 
 /**
+ * Whether two stored settings do the same thing. Shortcuts are compared by key and modifiers, not by their label:
+ * the same key can be labelled differently on another keyboard layout (e.g. "'" here, "Ä" on a German one).
+ */
+var SameSettings = ( a, b ) =>
+{
+	const first = NormalizeSettings( a );
+	const second = NormalizeSettings( b );
+
+	return first.storeInBackground === second.storeInBackground &&
+		first.steamStorePages === second.steamStorePages &&
+		SHORTCUT_ACTIONS.every( ( { id } ) =>
+		{
+			const x = first.shortcuts[ id ];
+			const y = second.shortcuts[ id ];
+			return x === null || y === null ? x === y : SameShortcut( x, y );
+		} );
+};
+
+/**
  * Turns sync on or off.
  *
  * Off: this browser keeps its current settings, now stored locally. Returns 'kept'.
@@ -157,7 +176,7 @@ var SetSyncEnabled = async( enabled, settings, keep ) =>
 
 	const { settings: synced } = await ExtApi.storage.sync.get( 'settings' );
 	const hasSynced = !!synced && typeof synced === 'object';
-	const same = hasSynced && JSON.stringify( NormalizeSettings( synced ) ) === JSON.stringify( NormalizeSettings( settings ) );
+	const same = hasSynced && SameSettings( synced, settings );
 
 	if( hasSynced && !same && !keep )
 	{

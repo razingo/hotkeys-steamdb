@@ -197,6 +197,9 @@ test.describe( 'turning sync back on when the synced settings differ', () =>
 
 		await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'X' );
 		await expect( page.locator( '#sync-settings' ) ).toBeChecked();
+
+		// The question is gone, so keyboard focus goes back to the switch
+		await expect( page.locator( '#sync-settings' ) ).toBeFocused();
 		expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
 		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( true );
 	} );
@@ -211,6 +214,20 @@ test.describe( 'turning sync back on when the synced settings differ', () =>
 		expect( ( await StoredLocal( page ) ).syncSettings ).toBe( false );
 		expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
 	} );
+} );
+
+test( 'turning sync back on doesn\'t ask when only the key labels differ (another keyboard layout)', async( { page } ) =>
+{
+	// The same physical key, labelled by a German layout here and an English one in the synced settings
+	const Quote = ( label ) => ( { code: 'Quote', label, ctrl: false, alt: false, shift: false, meta: false } );
+	const local = { syncSettings: false, settings: SettingsWith( { shortcuts: { wishlist: Quote( 'Ä' ) } } ) };
+	const sync = { settings: SettingsWith( { shortcuts: { wishlist: Quote( '\'' ) } } ) };
+	await OpenOptionsPage( page, { local, sync } );
+
+	await page.locator( '#sync-settings' ).check();
+
+	await expect( page.getByText( 'Sync turned on' ) ).toBeVisible();
+	await expect( page.locator( '#sync-choice' ) ).toBeHidden();
 } );
 
 test( 'turning sync back on doesn\'t ask when the synced settings are the same', async( { page } ) =>

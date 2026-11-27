@@ -286,8 +286,15 @@
 		ChangeSync( syncSettings.checked );
 	} );
 
-	document.getElementById( 'sync-keep-this' ).addEventListener( 'click', () => ChangeSync( true, 'this' ) );
-	document.getElementById( 'sync-keep-synced' ).addEventListener( 'click', () => ChangeSync( true, 'synced' ) );
+	// The question disappears once answered, so put keyboard focus back on the switch instead of losing it
+	const AnswerSyncQuestion = async( keep ) =>
+	{
+		await ChangeSync( true, keep );
+		syncSettings.focus();
+	};
+
+	document.getElementById( 'sync-keep-this' ).addEventListener( 'click', () => AnswerSyncQuestion( 'this' ) );
+	document.getElementById( 'sync-keep-synced' ).addEventListener( 'click', () => AnswerSyncQuestion( 'synced' ) );
 
 	// Reset asks for a second click, so one stray click can't wipe out your own shortcuts
 	const RESET_LABEL = resetButton.textContent;

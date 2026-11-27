@@ -2,9 +2,18 @@
 
 What changed in each version. The newest is at the top.
 
+## 1.5.2
+
+The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- Turning sync back on no longer asks which settings to keep when both are the same keys, just labelled differently by another keyboard layout.
+- After answering that question, keyboard focus goes back to the sync switch instead of being lost.
+
 ## 1.5.1
 
-The first version for the browser stores. Bug fixes on top of 1.5.0.
+Not published to the stores; available from GitHub. Bug fixes on top of 1.5.0.
 
 ### Changed
 
