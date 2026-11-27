@@ -340,6 +340,9 @@ var BROWSER_SHORTCUTS = [
 	{ keys: 'Mod+Shift+KeyW', does: 'close the window', reserved: true },
 	{ keys: 'Mod+KeyQ', does: 'quit the browser', reserved: true, when: IS_MAC || ( IS_FIREFOX && IS_LINUX ) },
 	{ keys: 'Mod+Shift+KeyQ', does: 'quit the browser', reserved: true, when: IS_FIREFOX && IS_WINDOWS },
+	// macOS takes these for every app before the page sees them
+	{ keys: 'Mod+KeyH', does: 'hide the browser', reserved: true, when: IS_MAC },
+	{ keys: 'Mod+KeyM', does: 'minimize the window', reserved: true, when: IS_MAC },
 	{ keys: 'Ctrl+Tab', does: 'switch to the next tab', reserved: true },
 	{ keys: 'Ctrl+Shift+Tab', does: 'switch to the previous tab', reserved: true },
 	{ keys: 'Mod+KeyF', does: 'find in the page' },
@@ -352,7 +355,7 @@ var BROWSER_SHORTCUTS = [
 	{ keys: 'Mod+KeyL', does: 'go to the address bar' },
 	{ keys: 'Mod+KeyK', does: 'search the web' },
 	{ keys: 'Mod+KeyE', does: 'search the web' },
-	{ keys: 'Mod+KeyH', does: 'open your history' },
+	{ keys: 'Mod+KeyH', does: 'open your history', when: !IS_MAC },
 	{ keys: 'Mod+KeyJ', does: 'open your downloads' },
 	{ keys: 'Mod+KeyU', does: 'view the page source' },
 	{ keys: 'Mod+KeyO', does: 'open a file' },

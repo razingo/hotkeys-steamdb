@@ -97,6 +97,28 @@ test( 'the quit key is only refused where it really quits', async( { page, brows
 	}
 } );
 
+// On a Mac, the system hides the app with Cmd + H and minimizes it with Cmd + M before the page sees either.
+// Neither this PC nor GitHub runs a Mac, so the page pretends to be one. shared.js reads the platform as it loads.
+test( 'on a Mac, Cmd + H, Cmd + M and Cmd + Q are refused', async( { page } ) =>
+{
+	await page.addInitScript( () => Object.defineProperty( Navigator.prototype, 'platform', { get: () => 'MacIntel' } ) );
+	await page.goto( 'https://extension.test/' );
+	await page.addScriptTag( { path: path.join( ROOT, 'shared.js' ) } );
+
+	expect( await page.evaluate( () => IS_MAC ) ).toBe( true );
+	expect( await Check( page, { code: 'KeyH', mod: true } ) ).toMatchObject( { does: 'hide the browser', reserved: true } );
+	expect( await Check( page, { code: 'KeyM', mod: true } ) ).toMatchObject( { does: 'minimize the window', reserved: true } );
+	expect( await Check( page, { code: 'KeyQ', mod: true } ) ).toMatchObject( { does: 'quit the browser', reserved: true } );
+} );
+
+test( 'elsewhere, Ctrl + H opens the history and Ctrl + M is free', async( { page } ) =>
+{
+	test.skip( await page.evaluate( () => IS_MAC ), 'Runs on Windows and Linux' );
+
+	expect( await Check( page, { code: 'KeyH', mod: true } ) ).toEqual( { keys: 'Mod+KeyH', does: 'open your history', when: true } );
+	expect( await Check( page, { code: 'KeyM', mod: true } ) ).toBeNull();
+} );
+
 test( 'the default shortcuts don\'t clash with the browser', async( { page } ) =>
 {
 	expect( await page.evaluate( () => Object.values( DEFAULT_SETTINGS.shortcuts ).map( BrowserShortcutFor ) ) ).toEqual( [ null, null, null, null, null ] );

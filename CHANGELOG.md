@@ -2,9 +2,17 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.6
+## 1.5.7
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- On a Mac, Cmd + H and Cmd + M could be picked as shortcuts, but macOS uses them to hide and minimize the browser before the page sees them, so they'd never work. They're now refused, and Cmd + H is no longer described as opening your history (that's Ctrl + H on Windows and Linux).
+
+## 1.5.6
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 
