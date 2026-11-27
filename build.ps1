@@ -48,6 +48,7 @@ if( Test-Path $unpacked )
 }
 
 $zip = [System.IO.Compression.ZipFile]::Open( $zipPath, 'Create' )
+$finished = $false
 
 try
 {
@@ -63,10 +64,18 @@ try
 		# Entry names use forward slashes; Firefox rejects ZIPs with backslash paths
 		[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile( $zip, $source, $file, 'Optimal' ) | Out-Null
 	}
+
+	$finished = $true
 }
 finally
 {
 	$zip.Dispose()
+
+	# A build that stopped halfway leaves a ZIP that looks finished but has files missing. Don't keep it around.
+	if( -not $finished )
+	{
+		Remove-Item -LiteralPath $zipPath -ErrorAction SilentlyContinue
+	}
 }
 
 Write-Host "Built $zipPath ($( $files.Count ) files)"
