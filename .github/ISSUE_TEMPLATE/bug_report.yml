@@ -95,14 +95,14 @@ body:
     id: browser-version
     attributes:
       label: Browser version
-      placeholder: "131.0"
+      placeholder: "140.0"
 
   - type: input
     id: extension-version
     attributes:
       label: Extension version
       description: Shown on the About tab of the extension's settings.
-      placeholder: 1.5.5
+      placeholder: 1.5.6
     validations:
       required: true
 

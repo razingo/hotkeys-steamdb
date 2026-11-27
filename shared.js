@@ -1,6 +1,6 @@
 'use strict';
 
-// Shared by content.js and options.js
+// Shared by content.js, options.js and tabs.js
 //
 // Settings are stored under "settings" in storage.sync, or storage.local when the user turns sync off.
 // That choice is stored as "syncSettings" in storage.local.
@@ -55,6 +55,10 @@ var MODIFIER_KEYS = new Set( [ 'Control', 'Alt', 'AltGraph', 'Shift', 'Meta', 'O
 var IS_MAC = /Mac|iPhone|iPad/.test( navigator.platform || navigator.userAgent );
 
 var IS_FIREFOX = /Firefox\//.test( navigator.userAgent );
+
+var IS_WINDOWS = /Win/.test( navigator.platform || navigator.userAgent );
+
+var IS_LINUX = !IS_MAC && !IS_WINDOWS && /Linux/.test( navigator.platform || navigator.userAgent );
 
 /** A stored shortcut is either null (turned off) or a full shortcut object. Anything else is ignored. */
 var IsValidShortcut = ( s ) => s === null || ( !!s && typeof s === 'object' &&
@@ -185,11 +189,19 @@ var SetSyncEnabled = async( enabled, settings, keep ) =>
 		return 'conflict';
 	}
 
-	await ExtApi.storage.local.set( { syncSettings: true } );
+	// Upload first, then switch over. The other way round, open tabs react to the switch and could read
+	// the synced settings for a moment before this browser's have arrived there.
+	const upload = !hasSynced || keep === 'this';
 
-	if( !hasSynced || keep === 'this' )
+	if( upload )
 	{
 		await ExtApi.storage.sync.set( { settings } );
+	}
+
+	await ExtApi.storage.local.set( { syncSettings: true } );
+
+	if( upload )
+	{
 		return 'uploaded';
 	}
 
@@ -312,18 +324,22 @@ var SameShortcut = ( a, b ) => !!a && !!b &&
  * Common browser shortcuts, written as "Mod+Shift+KeyT", where Mod is Ctrl (Cmd on a Mac).
  * Reserved ones are kept by the browser and never reach extensions. The others do reach the page,
  * so this extension's shortcut would replace what the browser does while it's active.
- * firefoxOnly entries only exist in Firefox; other browsers don't use those keys at all.
- * @type {{keys: string, does: string, reserved?: boolean, firefoxOnly?: boolean}[]}
+ * An entry with `when: false` doesn't exist in this browser or on this system, so its keys are free to use.
+ * Quitting differs the most: Cmd + Q on a Mac, Ctrl + Q in Firefox on Linux, Ctrl + Shift + Q in Firefox on Windows.
+ * Chrome on Windows and Linux has no quit key at all (it's Alt + F, then X).
+ * @type {{keys: string, does: string, reserved?: boolean, when?: boolean}[]}
  */
 var BROWSER_SHORTCUTS = [
 	{ keys: 'Mod+KeyT', does: 'open a new tab', reserved: true },
 	{ keys: 'Mod+KeyN', does: 'open a new window', reserved: true },
 	{ keys: 'Mod+KeyW', does: 'close the tab', reserved: true },
 	{ keys: 'Mod+Shift+KeyT', does: 'reopen a closed tab', reserved: true },
-	{ keys: 'Mod+Shift+KeyN', does: 'open a private window', reserved: true },
-	{ keys: 'Mod+Shift+KeyP', does: 'open a private window', reserved: true, firefoxOnly: true },
+	// Chrome opens an incognito window, Firefox brings back the last window you closed
+	{ keys: 'Mod+Shift+KeyN', does: IS_FIREFOX ? 'reopen a closed window' : 'open a private window', reserved: true },
+	{ keys: 'Mod+Shift+KeyP', does: 'open a private window', reserved: true, when: IS_FIREFOX },
 	{ keys: 'Mod+Shift+KeyW', does: 'close the window', reserved: true },
-	{ keys: 'Mod+KeyQ', does: 'quit the browser', reserved: true },
+	{ keys: 'Mod+KeyQ', does: 'quit the browser', reserved: true, when: IS_MAC || ( IS_FIREFOX && IS_LINUX ) },
+	{ keys: 'Mod+Shift+KeyQ', does: 'quit the browser', reserved: true, when: IS_FIREFOX && IS_WINDOWS },
 	{ keys: 'Ctrl+Tab', does: 'switch to the next tab', reserved: true },
 	{ keys: 'Ctrl+Shift+Tab', does: 'switch to the previous tab', reserved: true },
 	{ keys: 'Mod+KeyF', does: 'find in the page' },
@@ -381,8 +397,8 @@ var BROWSER_SHORTCUTS = [
 	{ keys: 'ArrowLeft', does: 'scroll' },
 	{ keys: 'ArrowRight', does: 'scroll' },
 	{ keys: 'Enter', does: 'open links and press buttons' },
-	{ keys: 'Slash', does: 'quick find', firefoxOnly: true },
-	{ keys: 'Quote', does: 'quick find in links', firefoxOnly: true },
+	{ keys: 'Slash', does: 'quick find', when: IS_FIREFOX },
+	{ keys: 'Quote', does: 'quick find in links', when: IS_FIREFOX },
 ];
 
 /**
@@ -397,9 +413,9 @@ var BrowserShortcutFor = ( s ) =>
 		return null;
 	}
 
-	return BROWSER_SHORTCUTS.find( ( { keys, firefoxOnly } ) =>
+	return BROWSER_SHORTCUTS.find( ( { keys, when = true } ) =>
 	{
-		if( firefoxOnly && !IS_FIREFOX )
+		if( !when )
 		{
 			return false;
 		}

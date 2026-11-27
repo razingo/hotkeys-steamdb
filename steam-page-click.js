@@ -12,7 +12,8 @@
 
 const Wait = ( ms ) => new Promise( ( resolve ) => setTimeout( resolve, ms ) );
 
-// Same check as content.js, so both sides agree on which buttons are there (a fully transparent one isn't)
+// The same check content.js makes, so both sides agree on which buttons are there (a fully transparent one isn't).
+// content.js also has a fallback for browsers without checkVisibility; every browser the manifest allows has it.
 const IsVisible = ( el ) => el.checkVisibility?.( { checkOpacity: true, checkVisibilityCSS: true } ) ?? true;
 
 // Shows an amber ring for a moment when there's nothing we can do, so the key press isn't silently lost.

@@ -2,9 +2,24 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.5
+## 1.5.6
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- Ctrl + Q was refused as "the browser's shortcut to quit" on Windows and Linux, where Chrome doesn't use it at all. It's free to use there now. It's still refused where it does quit: Cmd + Q on a Mac, and Ctrl + Q in Firefox on Linux.
+- In Firefox on Windows, Ctrl + Shift + Q quits the browser, but could be picked as a shortcut that would never work. It's now refused.
+- In Firefox, the message for Ctrl + Shift + N said it opens a private window. In Firefox it reopens the last closed window, and the message now says so.
+- Turning sync back on and keeping this browser's settings: open pages could briefly use the old synced settings while the switch happened. This browser's settings are now uploaded first.
+
+### For developers
+
+- Playwright 1.65.1 for the tests.
+
+## 1.5.5
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

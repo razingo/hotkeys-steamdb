@@ -51,13 +51,49 @@ test( 'Firefox-only shortcuts only count in Firefox', async( { page, browserName
 {
 	const privateWindow = await Check( page, { code: 'KeyP', mod: true, shift: true } );
 
+	// Ctrl + Shift + N is taken in both, but does something else in each
+	const shiftN = await Check( page, { code: 'KeyN', mod: true, shift: true } );
+
 	if( browserName === 'firefox' )
 	{
 		expect( privateWindow ).toMatchObject( { does: 'open a private window', reserved: true } );
+		expect( shiftN ).toMatchObject( { does: 'reopen a closed window', reserved: true } );
 	}
 	else
 	{
 		expect( privateWindow ).toBeNull();
+		expect( shiftN ).toMatchObject( { does: 'open a private window', reserved: true } );
+	}
+} );
+
+// Cmd + Q on a Mac, Ctrl + Q in Firefox on Linux, Ctrl + Shift + Q in Firefox on Windows.
+// Chrome on Windows and Linux has no quit key, so Ctrl + Q is free there.
+test( 'the quit key is only refused where it really quits', async( { page, browserName } ) =>
+{
+	const platform = await page.evaluate( () => navigator.platform );
+	const ctrlQ = await Check( page, { code: 'KeyQ', mod: true } );
+	const ctrlShiftQ = await Check( page, { code: 'KeyQ', mod: true, shift: true } );
+	const quits = { does: 'quit the browser', reserved: true };
+
+	if( /Mac/.test( platform ) )
+	{
+		expect( ctrlQ ).toMatchObject( quits );
+		expect( ctrlShiftQ ).toBeNull();
+	}
+	else if( browserName !== 'firefox' )
+	{
+		expect( ctrlQ ).toBeNull();
+		expect( ctrlShiftQ ).toBeNull();
+	}
+	else if( /Win/.test( platform ) )
+	{
+		expect( ctrlQ ).toBeNull();
+		expect( ctrlShiftQ ).toMatchObject( quits );
+	}
+	else
+	{
+		expect( ctrlQ ).toMatchObject( quits );
+		expect( ctrlShiftQ ).toBeNull();
 	}
 } );
 
