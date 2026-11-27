@@ -10,7 +10,8 @@ const ROOT = path.join( __dirname, '..' );
  * Runs in the test page before any of its scripts: a small stand-in for the browser's extension API
  * (storage.sync, storage.local, storage.onChanged and runtime.sendMessage).
  * Messages the content script sends end up in window.__sentMessages.
- * @param {{sync?: object, local?: object}} storage
+ * With contextInvalidated, sendMessage throws like it does in a tab that was open while the extension updated.
+ * @param {{sync?: object, local?: object, contextInvalidated?: boolean}} storage
  */
 const InstallFakeExtensionApi = ( storage ) =>
 {
@@ -69,10 +70,15 @@ const InstallFakeExtensionApi = ( storage ) =>
 			onChanged: { addListener: ( listener ) => listeners.push( listener ) },
 		},
 		runtime: {
-			sendMessage: async( message ) =>
+			sendMessage: ( message ) =>
 			{
+				if( storage.contextInvalidated )
+				{
+					throw new Error( 'Extension context invalidated.' );
+				}
+
 				window.__sentMessages.push( message );
-				return { success: true };
+				return Promise.resolve( { success: true } );
 			},
 			getManifest: () => ( { version: 'test' } ),
 		},
@@ -94,7 +100,7 @@ const ContentScriptsFor = ( url ) =>
  * Opens a fake page at a real-looking address and runs the manifest's content scripts on it, as the extension would.
  * They all run in the page's own context here; tests/extension.spec.js covers the real separation.
  * @param {import('@playwright/test').Page} page
- * @param {{url: string, html: string, storage?: {sync?: object, local?: object}}} options
+ * @param {{url: string, html: string, storage?: {sync?: object, local?: object, contextInvalidated?: boolean}}} options
  */
 const OpenWithContentScript = async( page, { url, html, storage = {} } ) =>
 {
@@ -267,7 +273,7 @@ const SteamListPage = ( { signedIn = true, wishlisted = false, dynamicStore = tr
 
 	return `<!doctype html>
 		<title>Welcome to Steam</title>
-		<header style="height: 80px"><input id="store_nav_search_term">${signedIn ? '<span id="account_pulldown">Account</span>' : ''}</header>
+		<header style="height: 80px"><input id="store_nav_search_term">${signedIn ? '<span id="account_pulldown">Account</span>' : '<a class="global_action_link" href="https://store.steampowered.com/login/?redir=">login</a>'}</header>
 		<div class="tab_content">${Row( 111, 'Fleshborn' )}${Row( 222, 'Me_and_You' )}</div>
 		<script>
 			window.clicks = { wishlist: [], ignore: [], opened: 0 };

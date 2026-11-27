@@ -3,6 +3,9 @@
 	"private": true,
 	"description": "Development tools for Popup Hotkeys for SteamDB. The extension itself has no dependencies.",
 	"license": "MIT",
+	"engines": {
+		"node": ">=20"
+	},
 	"scripts": {
 		"test": "playwright test",
 		"lint": "web-ext lint --source-dir dist/extension"

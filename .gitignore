@@ -6,11 +6,16 @@
 dist/
 web-ext-artifacts/
 
+# Test tools and their output
+node_modules/
+test-results/
+playwright-report/
+
+# Store listing material (kept locally, not published)
+store/
+
 # Editor and OS files
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-node_modules/
-test-results/
-playwright-report/

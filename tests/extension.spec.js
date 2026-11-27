@@ -10,7 +10,7 @@ const fs = require( 'node:fs' );
 const os = require( 'node:os' );
 const path = require( 'node:path' );
 const { test, expect, chromium } = require( '@playwright/test' );
-const { ROOT, SteamDbPage, SteamStorePage, SteamListPage, ExtensionFiles } = require( './helpers' );
+const { ROOT, SteamDbPage, SteamStorePage, SteamListPage, SteamFrontPage, SteamSalePage, ExtensionFiles } = require( './helpers' );
 
 test.skip( ( { browserName } ) => browserName !== 'chromium', 'Playwright can only load extensions into Chromium' );
 
@@ -109,4 +109,38 @@ test( 'in a Steam store list, the packaged extension picks "Add to your wishlist
 	}, { timeout: 10_000 } ).toBeGreaterThan( 0 );
 
 	expect( ( await page.evaluate( () => window.clicks.wishlist ) )[ 0 ] ).toBe( '111' );
+} );
+
+/** Hovers a game and presses a key until the extension has started and the counter moves */
+const HoverAndPressUntil = async( page, selector, key, Counter ) =>
+{
+	await page.hover( selector );
+	await expect.poll( async() =>
+	{
+		await page.keyboard.press( key );
+		await page.waitForTimeout( 150 );
+		return page.evaluate( Counter );
+	}, { timeout: 10_000 } ).toBeGreaterThan( 0 );
+};
+
+test( 'on Steam\'s front page, the packaged extension uses a capsule\'s "..." menu', async() =>
+{
+	await context.route( 'https://store.steampowered.com/**', ( route ) => route.fulfill( { contentType: 'text/html', body: SteamFrontPage() } ) );
+
+	const page = await context.newPage();
+	await page.goto( 'https://store.steampowered.com/' );
+	await HoverAndPressUntil( page, 'a[href*="/app/555/"]', 'KeyW', () => window.clicks.capsuleWishlist.length );
+
+	expect( ( await page.evaluate( () => window.clicks.capsuleWishlist ) )[ 0 ] ).toBe( '555' );
+} );
+
+test( 'on a Steam sale page, the packaged extension presses a tile\'s wishlist button', async() =>
+{
+	await context.route( 'https://store.steampowered.com/**', ( route ) => route.fulfill( { contentType: 'text/html', body: SteamSalePage() } ) );
+
+	const page = await context.newPage();
+	await page.goto( 'https://store.steampowered.com/specials' );
+	await HoverAndPressUntil( page, '.tile[data-app="1111"] img', 'KeyW', () => window.clicks.wishlist.length );
+
+	expect( ( await page.evaluate( () => window.clicks.wishlist ) )[ 0 ] ).toBe( '1111' );
 } );

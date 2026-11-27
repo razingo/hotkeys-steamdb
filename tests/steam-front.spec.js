@@ -13,16 +13,12 @@ const OpenStoreMessage = ( url ) => ( { type: 'open-store', url, background: tru
 // Wishlist and Ignore share a 1 second cooldown
 const Cooldown = ( page ) => page.waitForTimeout( 1100 );
 
-test.beforeEach( async( { page }, testInfo ) =>
-{
-	if( !testInfo.title.includes( 'game page' ) )
-	{
-		await OpenWithContentScript( page, { url: 'https://store.steampowered.com/', html: SteamFrontPage() } );
-	}
-} );
+const OpenFrontPage = ( { page } ) => OpenWithContentScript( page, { url: 'https://store.steampowered.com/', html: SteamFrontPage() } );
 
 test.describe( 'recommendation box', () =>
 {
+	test.beforeEach( OpenFrontPage );
+
 	test( 'W removes a wishlisted game and adds it back, using Steam\'s own functions, not the add-only button', async( { page } ) =>
 	{
 		await page.hover( '.box-screenshot' );
@@ -114,6 +110,8 @@ test.describe( 'recommendation box', () =>
 
 test.describe( 'capsules', () =>
 {
+	test.beforeEach( OpenFrontPage );
+
 	test( 'W adds and removes through the capsule\'s "..." menu', async( { page } ) =>
 	{
 		await page.hover( 'a[href*="/app/555/"]' );
@@ -154,6 +152,8 @@ test.describe( 'capsules', () =>
 
 test.describe( 'other links', () =>
 {
+	test.beforeEach( OpenFrontPage );
+
 	test( 'a plain link to a game: Q opens it, W and R are left alone', async( { page } ) =>
 	{
 		await page.hover( '#plain-game' );

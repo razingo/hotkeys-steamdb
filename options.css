@@ -326,6 +326,26 @@ kbd {
 	border-color: var(--muted);
 }
 
+/* High contrast mode (e.g. Windows contrast themes) drops our colours, so draw the switch with system colours */
+@media (forced-colors: active) {
+	.toggle input[role="switch"] {
+		border-color: CanvasText;
+	}
+
+	.toggle input[role="switch"]::before {
+		background: CanvasText;
+	}
+
+	.toggle input[role="switch"]:checked {
+		background: Highlight;
+		border-color: Highlight;
+	}
+
+	.toggle input[role="switch"]:checked::before {
+		background: HighlightText;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.toggle input[role="switch"],
 	.toggle input[role="switch"]::before {
@@ -365,6 +385,12 @@ kbd {
 .btn-steam:hover {
 	background: linear-gradient(-60deg, #417a9b 5%, #67c1f5 95%);
 	color: #fff;
+}
+
+/* Reset waiting for its second click */
+.btn-steam.confirm {
+	background: var(--warning);
+	color: #1b2838;
 }
 
 .status {

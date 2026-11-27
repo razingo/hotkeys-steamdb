@@ -158,7 +158,21 @@ test( 'turning sync off keeps the settings, in this browser only', async( { page
 	expect( ( await StoredSync( page ) ).shortcuts.follow.code ).toBe( 'KeyE' );
 } );
 
-test( 'turning sync back on uploads this browser\'s settings', async( { page } ) =>
+test( 'turning sync back on uses the settings your other browsers synced, instead of overwriting them', async( { page } ) =>
+{
+	const local = { syncSettings: false, settings: SettingsWith( { shortcuts: { wishlist: Key( 'Z' ) } } ) };
+	const sync = { settings: SettingsWith( { shortcuts: { wishlist: Key( 'X' ) } } ) };
+	await OpenOptionsPage( page, { local, sync } );
+
+	await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'Z' );
+	await page.locator( '#sync-settings' ).check();
+
+	await expect( KeyButton( page, 'Wishlist' ) ).toHaveText( 'X' );
+	await expect( page.getByText( 'using the settings from your other browsers' ) ).toBeVisible();
+	expect( ( await StoredSync( page ) ).shortcuts.wishlist.code ).toBe( 'KeyX' );
+} );
+
+test( 'turning sync back on uploads this browser\'s settings when nothing is synced yet', async( { page } ) =>
 {
 	const local = { syncSettings: false, settings: SettingsWith( { shortcuts: { wishlist: Key( 'Z' ) } } ) };
 	await OpenOptionsPage( page, { local } );
@@ -171,12 +185,20 @@ test( 'turning sync back on uploads this browser\'s settings', async( { page } )
 	await expect.poll( async() => ( await StoredSync( page ) )?.shortcuts.wishlist.code ).toBe( 'KeyZ' );
 } );
 
-test( 'reset restores the defaults', async( { page } ) =>
+test( 'reset asks for a second click, then restores the defaults', async( { page } ) =>
 {
 	await OpenOptionsPage( page, { sync: { settings: SettingsWith( { shortcuts: { store: Key( 'Z' ) }, steamStorePages: false } ) } } );
 
-	await page.getByRole( 'button', { name: 'Reset to defaults' } ).click();
+	const reset = page.locator( '#reset' );
+	await reset.click();
 
+	// The first click only asks
+	await expect( reset ).toHaveText( 'Click again to reset' );
+	await expect( KeyButton( page, 'Store' ) ).toHaveText( 'Z' );
+
+	await reset.click();
+
+	await expect( reset ).toHaveText( 'Reset to defaults' );
 	await expect( KeyButton( page, 'Store' ) ).toHaveText( 'Q' );
 	await expect( page.locator( '#steam-store-pages' ) ).toBeChecked();
 	await expect.poll( async() => ( await StoredSync( page ) ).shortcuts.store.code ).toBe( 'KeyQ' );

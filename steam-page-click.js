@@ -9,14 +9,33 @@
 {
 
 const Wait = ( ms ) => new Promise( ( resolve ) => setTimeout( resolve, ms ) );
-const IsVisible = ( el ) => el.checkVisibility?.() ?? true;
 
-/** Waits up to half a second for a visible menu option matching the label, and clicks it */
-const PickMenuOption = async( selector, label ) =>
+// Same check as content.js, so both sides agree on which buttons are there (a fully transparent one isn't)
+const IsVisible = ( el ) => el.checkVisibility?.( { checkOpacity: true, checkVisibilityCSS: true } ) ?? true;
+
+// Shows an amber outline for a moment when there's nothing we can do, so the key press isn't silently lost
+const FlashUnavailable = ( el ) =>
 {
+	const outline = el.style.outline;
+	el.style.outline = '2px solid #e0a100';
+	setTimeout( () => el.style.outline = outline, 300 );
+};
+
+const VisibleOptions = ( selector ) => [ ...document.querySelectorAll( selector ) ].filter( IsVisible );
+
+/**
+ * Opens a menu, then waits up to half a second for an option matching the label and clicks it.
+ * Only options that weren't already showing count, so an unrelated menu elsewhere on the page is never used.
+ * If the option doesn't show up, Escape closes the menu again.
+ */
+const PickMenuOption = async( open, selector, label ) =>
+{
+	const before = new Set( VisibleOptions( selector ) );
+	open();
+
 	for( let attempt = 0; attempt < 20; attempt++ )
 	{
-		const option = [ ...document.querySelectorAll( selector ) ].find( ( el ) => IsVisible( el ) && label.test( el.textContent ) );
+		const option = VisibleOptions( selector ).find( ( el ) => !before.has( el ) && label.test( el.textContent ) );
 
 		if( option )
 		{
@@ -27,6 +46,7 @@ const PickMenuOption = async( selector, label ) =>
 		await Wait( 25 );
 	}
 
+	document.dispatchEvent( new KeyboardEvent( 'keydown', { key: 'Escape', code: 'Escape', bubbles: true } ) );
 	return false;
 };
 
@@ -40,9 +60,9 @@ document.addEventListener( 'hotkeys-steamdb:click', ( e ) =>
 	}
 } );
 
-// A game in Steam's older store sections (data-ds-appid): store list rows and the recommendation boxes.
+// A game in Steam's older store sections (data-ds-appid): store list rows, recommendation rows and boxes.
 // Uses the same functions as Steam's own options menu (GDynamicStore), so it adds or removes depending on
-// whether the game is already on the wishlist or ignored, and updates the "ON WISHLIST" badges afterwards.
+// whether the game is already on the wishlist or ignored, and redraws the "ON WISHLIST" badges right away.
 // If Steam ever drops those functions, list rows fall back to their options menu.
 const ToggleDynamicItem = ( item, kind ) =>
 {
@@ -57,10 +77,15 @@ const ToggleDynamicItem = ( item, kind ) =>
 
 	if( !appid || !store?.ModifyWishlist || !store.ModifyIgnoredApp || !$ )
 	{
-		if( item.querySelector( '.ds_options' ) )
+		const optionsButton = item.querySelector( '.ds_options' );
+
+		if( optionsButton )
 		{
-			item.querySelector( '.ds_options' ).click();
-			PickMenuOption( '.ds_options_tooltip .option', kind === 'wishlist' ? /wishlist/i : /ignore/i );
+			PickMenuOption( () => optionsButton.click(), '.ds_options_tooltip .option', kind === 'wishlist' ? /wishlist/i : /ignore/i );
+		}
+		else
+		{
+			FlashUnavailable( item );
 		}
 
 		return;
@@ -115,12 +140,20 @@ const MenuButtonOf = ( capsule ) =>
 
 const PickFromCapsuleMenu = ( capsule, label ) =>
 {
-	const button = capsule instanceof HTMLElement ? MenuButtonOf( capsule ) : null;
+	if( !( capsule instanceof HTMLElement ) )
+	{
+		return;
+	}
+
+	const button = MenuButtonOf( capsule );
 
 	if( button )
 	{
-		button.click();
-		PickMenuOption( '.contextMenuItem, [role="menuitem"]', label );
+		PickMenuOption( () => button.click(), '.contextMenuItem, [role="menuitem"]', label );
+	}
+	else
+	{
+		FlashUnavailable( capsule );
 	}
 };
 

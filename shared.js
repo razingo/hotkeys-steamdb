@@ -42,7 +42,7 @@ var DEFAULT_SETTINGS = {
 		ignoreElsewhere: PlainKey( 'T' ),
 	},
 	storeInBackground: true,
-	// Shortcuts also work on the Steam store: game pages and store lists
+	// Shortcuts also work on the Steam store, not just on steamdb.info
 	steamStorePages: true,
 };
 
@@ -51,6 +51,14 @@ var ExtApi = globalThis.browser ?? globalThis.chrome;
 var MODIFIER_KEYS = new Set( [ 'Control', 'Alt', 'AltGraph', 'Shift', 'Meta', 'OS', 'CapsLock', 'Fn' ] );
 
 var IS_MAC = /Mac|iPhone|iPad/.test( navigator.platform || navigator.userAgent );
+
+var IS_FIREFOX = /Firefox\//.test( navigator.userAgent );
+
+/** A stored shortcut is either null (turned off) or a full shortcut object. Anything else is ignored. */
+var IsValidShortcut = ( s ) => s === null || ( !!s && typeof s === 'object' &&
+	typeof s.code === 'string' && s.code !== '' &&
+	typeof s.label === 'string' &&
+	[ s.ctrl, s.alt, s.shift, s.meta ].every( ( flag ) => typeof flag === 'boolean' ) );
 
 /** @returns {Settings} */
 var CloneDefaults = () => JSON.parse( JSON.stringify( DEFAULT_SETTINGS ) );
@@ -80,7 +88,8 @@ var LoadSettings = async() =>
 
 			for( const { id } of SHORTCUT_ACTIONS )
 			{
-				if( stored.shortcuts && Object.hasOwn( stored.shortcuts, id ) )
+				// A broken entry keeps the default rather than showing up as "undefined" in the settings
+				if( stored.shortcuts && Object.hasOwn( stored.shortcuts, id ) && IsValidShortcut( stored.shortcuts[ id ] ) )
 				{
 					settings.shortcuts[ id ] = stored.shortcuts[ id ];
 				}
@@ -89,7 +98,7 @@ var LoadSettings = async() =>
 	}
 	catch( error )
 	{
-		console.error( '[SteamDB hotkeys] Failed to load settings', error );
+		console.error( '[Popup Hotkeys for SteamDB] Failed to load settings', error );
 	}
 
 	return settings;
@@ -118,13 +127,31 @@ var IsSyncEnabled = async() =>
 };
 
 /**
- * Turns sync on or off, and carries the current settings over so nothing changes for the user.
+ * Turns sync on or off.
+ * Off: this browser keeps its current settings, now stored locally.
+ * On: if your other browsers already synced settings, this browser switches to those ("adopted"), so turning sync on
+ * here never overwrites them. If nothing is synced yet, this browser's settings become the synced ones ("uploaded").
  * @param {boolean} enabled @param {Settings} settings
+ * @returns {Promise<'kept'|'adopted'|'uploaded'>}
  */
 var SetSyncEnabled = async( enabled, settings ) =>
 {
-	await ExtApi.storage.local.set( { syncSettings: enabled } );
-	await SaveSettings( settings );
+	if( !enabled )
+	{
+		await ExtApi.storage.local.set( { syncSettings: false, settings } );
+		return 'kept';
+	}
+
+	const { settings: synced } = await ExtApi.storage.sync.get( 'settings' );
+	await ExtApi.storage.local.set( { syncSettings: true } );
+
+	if( synced && typeof synced === 'object' )
+	{
+		return 'adopted';
+	}
+
+	await ExtApi.storage.sync.set( { settings } );
+	return 'uploaded';
 };
 
 /**
@@ -218,9 +245,10 @@ var SameShortcut = ( a, b ) => !!a && !!b &&
 
 /**
  * Common browser shortcuts, written as "Mod+Shift+KeyT", where Mod is Ctrl (Cmd on a Mac).
- * Reserved ones are kept by the browser and never reach extensions; the others reach the page,
+ * Reserved ones are kept by the browser and never reach extensions. The others do reach the page,
  * so this extension's shortcut would replace what the browser does while it's active.
- * @type {{keys: string, does: string, reserved?: boolean}[]}
+ * firefoxOnly entries only exist in Firefox; other browsers don't use those keys at all.
+ * @type {{keys: string, does: string, reserved?: boolean, firefoxOnly?: boolean}[]}
  */
 var BROWSER_SHORTCUTS = [
 	{ keys: 'Mod+KeyT', does: 'open a new tab', reserved: true },
@@ -228,7 +256,7 @@ var BROWSER_SHORTCUTS = [
 	{ keys: 'Mod+KeyW', does: 'close the tab', reserved: true },
 	{ keys: 'Mod+Shift+KeyT', does: 'reopen a closed tab', reserved: true },
 	{ keys: 'Mod+Shift+KeyN', does: 'open a private window', reserved: true },
-	{ keys: 'Mod+Shift+KeyP', does: 'open a private window in Firefox', reserved: true },
+	{ keys: 'Mod+Shift+KeyP', does: 'open a private window', reserved: true, firefoxOnly: true },
 	{ keys: 'Mod+Shift+KeyW', does: 'close the window', reserved: true },
 	{ keys: 'Mod+KeyQ', does: 'quit the browser', reserved: true },
 	{ keys: 'Ctrl+Tab', does: 'switch to the next tab', reserved: true },
@@ -288,8 +316,8 @@ var BROWSER_SHORTCUTS = [
 	{ keys: 'ArrowLeft', does: 'scroll' },
 	{ keys: 'ArrowRight', does: 'scroll' },
 	{ keys: 'Enter', does: 'open links and press buttons' },
-	{ keys: 'Slash', does: 'quick find in Firefox' },
-	{ keys: 'Quote', does: 'quick find in links in Firefox' },
+	{ keys: 'Slash', does: 'quick find', firefoxOnly: true },
+	{ keys: 'Quote', does: 'quick find in links', firefoxOnly: true },
 ];
 
 /**
@@ -304,8 +332,13 @@ var BrowserShortcutFor = ( s ) =>
 		return null;
 	}
 
-	return BROWSER_SHORTCUTS.find( ( { keys } ) =>
+	return BROWSER_SHORTCUTS.find( ( { keys, firefoxOnly } ) =>
 	{
+		if( firefoxOnly && !IS_FIREFOX )
+		{
+			return false;
+		}
+
 		const parts = keys.split( '+' );
 		const code = parts.pop();
 		const mod = parts.includes( 'Mod' );

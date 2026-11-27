@@ -47,6 +47,20 @@ test( 'plain letters and unusual combinations are fine', async( { page } ) =>
 	expect( await page.evaluate( () => BrowserShortcutFor( null ) ) ).toBeNull();
 } );
 
+test( 'Firefox-only shortcuts only count in Firefox', async( { page, browserName } ) =>
+{
+	const privateWindow = await Check( page, { code: 'KeyP', mod: true, shift: true } );
+
+	if( browserName === 'firefox' )
+	{
+		expect( privateWindow ).toMatchObject( { does: 'open a private window', reserved: true } );
+	}
+	else
+	{
+		expect( privateWindow ).toBeNull();
+	}
+} );
+
 test( 'the default shortcuts don\'t clash with the browser', async( { page } ) =>
 {
 	expect( await page.evaluate( () => Object.values( DEFAULT_SETTINGS.shortcuts ).map( BrowserShortcutFor ) ) ).toEqual( [ null, null, null, null, null ] );

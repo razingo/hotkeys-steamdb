@@ -4,6 +4,7 @@
 	"version": "1.5.0",
 	"description": "Keyboard shortcuts for Store, Wishlist, Follow and Ignore in SteamDB's game popup and on Steam store pages. Unofficial.",
 	"homepage_url": "https://github.com/razingo/hotkeys-steamdb",
+	"minimum_chrome_version": "111",
 	"icons":
 	{
 		"16": "icons/icon-16.png",

@@ -63,6 +63,17 @@ test.describe( 'steamdb.info popup with the SteamDB extension', () =>
 		expect( ( await Clicks( page ) ).wishlist ).toBe( 1 );
 	} );
 
+	test( 'a quick double press doesn\'t leave the highlight stuck on the button', async( { page } ) =>
+	{
+		const wishlist = page.locator( '.hover-buttons button', { hasText: 'Wishlist' } );
+
+		await page.keyboard.press( 'KeyW' );
+		await page.waitForTimeout( 100 );
+		await page.keyboard.press( 'KeyW' );
+
+		await expect( wishlist ).toHaveCSS( 'outline-style', 'none', { timeout: 1000 } );
+	} );
+
 	test( 'keys are ignored while typing in a text field', async( { page } ) =>
 	{
 		await page.locator( '#search' ).focus();
@@ -85,7 +96,7 @@ test.describe( 'steamdb.info popup with the SteamDB extension', () =>
 		await page.keyboard.press( 'KeyX' );
 		await page.keyboard.press( 'Shift+KeyQ' );
 
-		// The page also sees Ctrl itself go down; only the letters matter here
+		// The page also sees Shift itself go down; only the letters matter here
 		const letters = ( await KeysSeenByPage( page ) ).filter( ( code ) => code.startsWith( 'Key' ) );
 		expect( letters ).toEqual( [ 'KeyX', 'KeyQ' ] );
 		expect( await SentMessages( page ) ).toEqual( [] );
@@ -193,6 +204,27 @@ test.describe( 'settings', () =>
 		await page.keyboard.press( 'KeyG' );
 
 		expect( ( await Clicks( page ) ).ignore ).toBe( 1 );
+	} );
+
+	test( 'after the extension updates, Q still opens the store page in tabs that were already open', async( { page } ) =>
+	{
+		// The old copy of the content script can't reach the extension any more, so it opens the page itself
+		await OpenWithContentScript( page, { url: URL, html: SteamDbPage(), storage: { contextInvalidated: true } } );
+		await page.evaluate( () => window.open = ( url ) => { window.__opened = url; } );
+
+		await page.keyboard.press( 'KeyQ' );
+
+		expect( await page.evaluate( () => window.__opened ) ).toBe( 'https://store.steampowered.com/app/730/' );
+	} );
+
+	test( 'a broken stored shortcut keeps its default', async( { page } ) =>
+	{
+		const settings = SettingsWith( { shortcuts: { wishlist: { code: 'KeyZ' } } } );
+		await OpenWithContentScript( page, { url: URL, html: SteamDbPage(), storage: { sync: { settings } } } );
+
+		await page.keyboard.press( 'KeyW' );
+
+		expect( ( await Clicks( page ) ).wishlist ).toBe( 1 );
 	} );
 
 	test( 'broken stored settings fall back to the defaults', async( { page } ) =>

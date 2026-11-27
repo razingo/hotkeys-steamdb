@@ -43,12 +43,12 @@ It also works on the Steam store: on game pages, <kbd>W</kbd>, <kbd>E</kbd>, <kb
 
 | Game pages | Store lists and capsules: hover over a game |
 |:---:|:---:|
-| <img src="docs/steam-game-page-buttons.png" alt="Steam game page with Add to your wishlist, Follow and Ignore buttons, and the Ignore menu open showing Ignore This and Played on Another Platform" width="420"> | <img src="docs/steam-list-menu.png" alt="Options menu of a game in a Steam store list with Add to wishlist, Ignore Game and Preferences" width="200"> |
+| <img src="docs/steam-game-page-buttons.png" alt="Steam game page with Add to your wishlist, Follow and Ignore buttons, and the Ignore menu open showing Ignore This and Played on Another Platform" width="420"> | <img src="docs/steam-list-menu.png" alt="The menu of a game capsule on the Steam front page with Add to wishlist, Ignore Game and Preferences" width="200"> |
 | <kbd>W</kbd> wishlist, <kbd>E</kbd> follow, <kbd>R</kbd> ignore, <kbd>T</kbd> played on another platform | <kbd>Q</kbd> open its page, <kbd>W</kbd> wishlist, <kbd>R</kbd> ignore |
 
 ## Requirements
 
-- Chrome, Edge, Brave, Opera or another Chromium-based browser, or Firefox 140 or newer.
+- Chrome, Edge, Brave, Opera or another Chromium-based browser (version 111 or newer), or Firefox 140 or newer.
 - On the Steam store: being signed in to Steam.
 - For Wishlist, Follow and Ignore on steamdb.info:
   - Your Steam account linked to SteamDB (**Sign in** on steamdb.info).
@@ -62,7 +62,7 @@ The extension isn't in the browser stores yet, so it's loaded from source.
 
 ### Chrome, Edge, Brave, Opera
 
-1. Download this repository (**Code → Download ZIP**) and unzip it, or clone it.
+1. Download this repository (**Code → Download ZIP**) and unzip it, or clone it. If you cloned it and ran `npm install` for the tests, build the ZIP with `build.ps1` and load that instead: Chrome refuses folders with `node_modules` in them.
 2. Open `chrome://extensions` (or `edge://extensions`).
 3. Turn on **Developer mode**.
 4. Click **Load unpacked** and choose the folder that contains `manifest.json`.
@@ -90,8 +90,8 @@ Click the extension's toolbar icon, or open its **Options** from the extensions 
 - **Browser shortcuts:** ones the browser keeps for itself, such as <kbd>Ctrl</kbd> + <kbd>T</kbd> or <kbd>Ctrl</kbd> + <kbd>W</kbd>, can't be used. Common ones such as <kbd>Ctrl</kbd> + <kbd>F</kbd> or <kbd>Space</kbd> can, but you'll see a warning: on SteamDB popups and the Steam store they do this extension's action instead of the browser's.
 - **Store page:** choose whether it opens in a background tab or switches to it.
 - **Also on the Steam store:** turn the shortcuts on Steam's own pages on or off.
-- **Sync settings between your browsers:** on by default, using your browser's sync when that's turned on. Turn it off to keep this browser's shortcuts to itself; the setting is per browser.
-- **Reset to defaults** restores Q / W / E / R / T and the options above, except sync.
+- **Sync settings between your browsers:** on by default, using your browser's sync when that's turned on. Turn it off to keep this browser's shortcuts to itself; the setting is per browser. Turning it back on switches this browser to the settings your other browsers synced, if there are any, so it never overwrites them.
+- **Reset to defaults** restores Q / W / E / R / T and the options above, except sync. It asks for a second click first.
 - The **About** tab and the buttons at the bottom link to this repository and to Buy Me a Coffee.
 
 Settings save immediately and apply to open tabs without reloading.
@@ -128,7 +128,6 @@ If SteamDB or Steam change that text, or show it in another language, the shortc
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
 | `icons/` | Extension icons (16, 32, 48 and 128 px) |
 | `docs/` | Screenshots for this README (not part of the extension) |
-| `store/` | Screenshots, promo tile and [guide to publishing and updating](store/PUBLISHING.md) in the browser stores (not part of the extension) |
 | `build.ps1` | Builds the ZIP for the browser stores in `dist/`: `powershell -ExecutionPolicy Bypass -File build.ps1` |
 | `tests/`, `playwright.config.js`, `package.json` | Automated tests (not part of the extension) |
 | `CHANGELOG.md` | What changed in each version |

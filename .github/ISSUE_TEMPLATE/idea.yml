@@ -6,14 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea! This extension can only work with what's on steamdb.info: it presses buttons in SteamDB's game popup. Things the site itself would have to change are better suggested to [SteamDB](https://github.com/SteamDatabase/BrowserExtension/issues).
+        Thanks for the idea! This extension can only work with what's already on the page: it presses the buttons in SteamDB's game popup and on the Steam store for you. If SteamDB or Steam would have to add something first, it's better suggested to them, for example to [SteamDB](https://github.com/SteamDatabase/BrowserExtension/issues).
 
   - type: textarea
     id: idea
     attributes:
       label: What's your idea?
       description: Describe what you'd like the extension to do.
-      placeholder: A shortcut that copies the game's App ID from the popup.
+      placeholder: A shortcut that copies the game's App ID.
     validations:
       required: true
 

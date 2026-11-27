@@ -6,10 +6,24 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting! Before you start, please check the basics:
-        - You're on **steamdb.info** and the game popup is open.
-        - Wishlist, Follow and Ignore need the [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension) and your Steam account linked to SteamDB (**Sign in** on steamdb.info).
+        Thanks for reporting! A few things to check first:
+        - **On steamdb.info:** the game popup is open. Wishlist, Follow and Ignore also need the [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension) and your Steam account linked to SteamDB (**Sign in** on steamdb.info).
+        - **On the Steam store:** you're signed in to Steam, the mouse is over a game (or you're on a game's page), and "Also on the Steam store" is on in the settings. Not every part of the store has every action, see [Shortcuts](https://github.com/razingo/hotkeys-steamdb#shortcuts).
+        - **Right after updating the extension:** refresh the page first.
         - "Extension error … is not valid JSON" comes from the SteamDB extension, not this one. See [Troubleshooting](https://github.com/razingo/hotkeys-steamdb#troubleshooting).
+
+  - type: dropdown
+    id: site
+    attributes:
+      label: Where did it happen?
+      options:
+        - steamdb.info
+        - A Steam store game page
+        - The Steam store front page
+        - Another Steam store page (search, sale page, ...)
+        - The extension's settings
+    validations:
+      required: true
 
   - type: dropdown
     id: shortcut
@@ -17,11 +31,12 @@ body:
       label: Which shortcuts are affected?
       multiple: true
       options:
-        - Store
-        - Wishlist
-        - Follow
-        - Ignore
-        - None, it's something else (settings page, etc.)
+        - Store (Q)
+        - Wishlist (W)
+        - Follow (E)
+        - Ignore (R)
+        - "Ignore: played elsewhere (T)"
+        - None, it's something else
     validations:
       required: true
 
@@ -29,15 +44,15 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: What you did, what you expected, and what happened instead.
-      placeholder: I hovered over a game on the Trending page and pressed W. Nothing happened.
+      description: What you did, what you expected, and what happened instead. If you're on the Steam store, say which section the game was in (for example Discounts & Events).
+      placeholder: I hovered over a game on SteamDB's Trending page and pressed W. Nothing happened.
     validations:
       required: true
 
   - type: input
     id: page
     attributes:
-      label: SteamDB page
+      label: Page address
       description: The address of the page where it happened.
       placeholder: https://steamdb.info/charts/
     validations:
@@ -47,23 +62,20 @@ body:
     id: steamdb-extension
     attributes:
       label: Is the SteamDB extension installed?
+      description: Only matters on steamdb.info.
       options:
         - "Yes"
         - "No"
         - Not sure
-    validations:
-      required: true
 
   - type: dropdown
-    id: linked-account
+    id: signed-in
     attributes:
-      label: Is your Steam account linked to SteamDB?
+      label: Are you signed in to Steam (and linked to SteamDB, if it happened on steamdb.info)?
       options:
         - "Yes"
         - "No"
         - Not sure
-    validations:
-      required: true
 
   - type: dropdown
     id: browser
@@ -90,7 +102,7 @@ body:
     attributes:
       label: Extension version
       description: Shown on the About tab of the extension's settings.
-      placeholder: 1.4.0
+      placeholder: 1.5.0
     validations:
       required: true
 
@@ -98,4 +110,4 @@ body:
     id: screenshots
     attributes:
       label: Screenshots or console errors
-      description: A screenshot of the popup helps if the site may have changed. Drag images into this box.
+      description: A screenshot of the page helps if the site may have changed. Drag images into this box.

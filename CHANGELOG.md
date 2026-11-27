@@ -21,23 +21,18 @@ The first version for the browser stores. It brings the shortcuts to Steam's own
 - **Browser-shortcut warning:** shortcuts the browser keeps for itself (such as Ctrl + T) are refused; common ones the extension would take over (such as Ctrl + F or Space) show a warning.
 - **New settings:**
   - "Also on the Steam store" turns all the Steam store shortcuts on or off.
-  - "Sync settings between your browsers" turns sync on or off, per browser.
+  - "Sync settings between your browsers" turns sync on or off, per browser. Turning it back on uses the settings your other browsers synced, so it never overwrites them.
 - The options are now on/off switches.
+- "Reset to defaults" asks for a second click, so a stray click can't wipe your shortcuts.
 
 ### Changed
 
 - Steam's buttons are clicked from the page's own context, so Steam's Wishlist button, a `javascript:` link that browsers don't run when an extension clicks it, works.
 - The extension now runs on all `store.steampowered.com` pages, not only on steamdb.info. Browsers ask for this access when you install it.
 
-### Fixed
-
-- Badges in Steam's older store sections didn't update after a shortcut, or only after a few seconds.
-- In a recommendation box, the shortcut sometimes pressed Steam's add-only button, which can't remove a game, when the mouse was near the box's edge.
-
 ### For developers
 
 - Automated tests with Playwright, in Chromium and Firefox, run by GitHub on every push together with Firefox's add-on validator.
-- Store guide: [store/PUBLISHING.md](store/PUBLISHING.md), including how to publish updates.
 
 ## 1.4.0
 

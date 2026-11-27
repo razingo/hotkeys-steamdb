@@ -2,7 +2,8 @@
 
 // Uses SHORTCUT_ACTIONS, LoadSettings, EventMatches and ExtApi from shared.js
 //
-// Runs on steamdb.info (buttons in the game popup) and on Steam store game pages (Steam's own buttons).
+// Runs on steamdb.info (buttons in the game popup) and on the Steam store: game pages, the front page,
+// store lists, recommendations and sale pages. On Steam, steam-page-click.js does the actual clicking.
 
 ( async() =>
 {
@@ -130,6 +131,10 @@
 
 	const Hovered = () => [ ...document.querySelectorAll( ':hover' ) ].pop();
 
+	// Steam's older header has an account menu, the newer one doesn't. Signed out, both show a link to the login page.
+	const IsSignedInToSteam = () => !!document.getElementById( 'account_pulldown' ) ||
+		!document.querySelector( 'a[href*="store.steampowered.com/login"], a[href^="/login"]' );
+
 	const AppIdOf = ( link ) => link ? STEAM_GAME_LINK.exec( link.href )?.[ 1 ] : undefined;
 
 	// Games in Steam's older store sections carry data-ds-appid: rows in store lists (front page tabs, search results)
@@ -145,7 +150,7 @@
 		const appid = item?.dataset.dsAppid;
 
 		// Bundles list several apps; signed out, there's no wishlist to change
-		if( !appid || !/^\d+$/.test( appid ) || !document.getElementById( 'account_pulldown' ) )
+		if( !appid || !/^\d+$/.test( appid ) || !IsSignedInToSteam() )
 		{
 			return null;
 		}
@@ -326,11 +331,26 @@
 	const FLASH_OK = '#66c0f4';
 	const FLASH_COOLDOWN = '#e0a100';
 
+	// Remembers each button's own outline while it's flashing. Without this, a second flash within 300 ms
+	// would save the first flash's outline as "the original" and leave it on for good.
+	/** @type {WeakMap<HTMLElement, {outline: string, timer: number}>} */
+	const flashing = new WeakMap();
+
 	const Flash = ( el, color = FLASH_OK ) =>
 	{
-		const old = el.style.outline;
+		const current = flashing.get( el );
+		const outline = current ? current.outline : el.style.outline;
+		clearTimeout( current?.timer );
+
 		el.style.outline = `2px solid ${color}`;
-		setTimeout( () => el.style.outline = old, 300 );
+		flashing.set( el, {
+			outline,
+			timer: setTimeout( () =>
+			{
+				el.style.outline = outline;
+				flashing.delete( el );
+			}, 300 ),
+		} );
 	};
 
 	// Wishlist, Follow and Ignore each send a request to the Steam store (on steamdb.info, through the SteamDB extension).
@@ -380,15 +400,24 @@
 	{
 		const fallback = () => window.open( href, '_blank', 'noopener' );
 
-		ExtApi.runtime.sendMessage( { type: 'open-store', url: href, background: settings.storeInBackground } )
-			.then( ( response ) =>
-			{
-				if( !response?.success )
+		try
+		{
+			ExtApi.runtime.sendMessage( { type: 'open-store', url: href, background: settings.storeInBackground } )
+				.then( ( response ) =>
 				{
-					fallback();
-				}
-			} )
-			.catch( fallback );
+					if( !response?.success )
+					{
+						fallback();
+					}
+				} )
+				.catch( fallback );
+		}
+		catch
+		{
+			// After the extension updates, tabs that were already open keep running the old copy of this script.
+			// It can't talk to the extension any more and sendMessage throws right away, so open the page directly.
+			fallback();
+		}
 	};
 
 	document.addEventListener( 'keydown', ( e ) =>

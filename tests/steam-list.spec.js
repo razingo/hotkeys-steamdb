@@ -81,7 +81,7 @@ test( 'keys are left alone when the mouse isn\'t over a game', async( { page } )
 	expect( await page.evaluate( () => window.__sentMessages ) ).toEqual( [] );
 } );
 
-test( 'signed out: games have no options menu, so keys are left alone', async( { page } ) =>
+test( 'signed out: W is left alone', async( { page } ) =>
 {
 	await OpenWithContentScript( page, { url: URL, html: SteamListPage( { signedIn: false } ) } );
 	await page.hover( '[data-ds-appid="111"]' );

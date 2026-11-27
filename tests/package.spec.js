@@ -59,6 +59,12 @@ test( 'content scripts load shared.js first and only run on SteamDB and the Stea
 	expect( manifest.host_permissions ).toBeUndefined();
 } );
 
+// steam-page-click.js runs in the page's own context ("world": "MAIN"), which needs Chrome 111
+test( 'the manifest asks for a Chrome version that supports everything it uses', () =>
+{
+	expect( Number( manifest.minimum_chrome_version ) ).toBeGreaterThanOrEqual( 111 );
+} );
+
 test( 'version is a plain x.y.z number, as the stores require', () =>
 {
 	expect( manifest.version ).toMatch( /^\d+\.\d+\.\d+$/ );

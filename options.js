@@ -239,8 +239,18 @@
 	{
 		try
 		{
-			await SetSyncEnabled( syncSettings.checked, settings );
-			ShowStatus( syncSettings.checked ? 'Sync turned on' : 'Sync turned off' );
+			const result = await SetSyncEnabled( syncSettings.checked, settings );
+
+			if( result === 'adopted' )
+			{
+				settings = await LoadSettings();
+				Render();
+				ShowStatus( 'Sync turned on, using the settings from your other browsers' );
+			}
+			else
+			{
+				ShowStatus( syncSettings.checked ? 'Sync turned on' : 'Sync turned off' );
+			}
 		}
 		catch( error )
 		{
@@ -249,8 +259,32 @@
 		}
 	} );
 
+	// Reset asks for a second click, so one stray click can't wipe out your own shortcuts
+	const RESET_LABEL = resetButton.textContent;
+	let resetArmedUntil = 0;
+	let resetTimer = 0;
+
+	const DisarmReset = () =>
+	{
+		resetArmedUntil = 0;
+		resetButton.textContent = RESET_LABEL;
+		resetButton.classList.remove( 'confirm' );
+	};
+
 	resetButton.addEventListener( 'click', () =>
 	{
+		if( Date.now() > resetArmedUntil )
+		{
+			resetArmedUntil = Date.now() + 4000;
+			resetButton.textContent = 'Click again to reset';
+			resetButton.classList.add( 'confirm' );
+			clearTimeout( resetTimer );
+			resetTimer = setTimeout( DisarmReset, 4000 );
+			return;
+		}
+
+		clearTimeout( resetTimer );
+		DisarmReset();
 		settings = CloneDefaults();
 
 		for( const { id } of SHORTCUT_ACTIONS )
@@ -260,6 +294,12 @@
 
 		StopRecording();
 		Save();
+	} );
+
+	resetButton.addEventListener( 'blur', () =>
+	{
+		clearTimeout( resetTimer );
+		DisarmReset();
 	} );
 
 	Render();
