@@ -1,6 +1,7 @@
 # Builds the ZIP to upload to the Chrome Web Store, Firefox Add-ons and Edge Add-ons.
 # Usage: powershell -ExecutionPolicy Bypass -File build.ps1
 # Output: dist/popup-hotkeys-for-steamdb-<version>.zip, with manifest.json at the top level.
+# Older builds in dist/ are removed first, so the only ZIP there is the one to upload.
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
@@ -27,9 +28,23 @@ $dist = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $dist | Out-Null
 $zipPath = Join-Path $dist "popup-hotkeys-for-steamdb-$version.zip"
 
-if( Test-Path $zipPath )
+# Clear out earlier builds: old ZIPs, folders they were unzipped into, and the unpacked copy the checks use.
+# Only names this script (or its checks) create are touched, anything else in dist/ stays.
+Get-ChildItem -Path $dist -Filter 'popup-hotkeys-for-steamdb-*' | ForEach-Object {
+	Remove-Item -Recurse -Force -LiteralPath $_.FullName
+
+	# The current version's ZIP is rebuilt right below, so it isn't really an old build
+	if( $_.FullName -ne $zipPath )
+	{
+		Write-Host "Removed old build: $( $_.Name )"
+	}
+}
+
+$unpacked = Join-Path $dist 'extension'
+
+if( Test-Path $unpacked )
 {
-	Remove-Item $zipPath
+	Remove-Item -Recurse -Force -LiteralPath $unpacked
 }
 
 $zip = [System.IO.Compression.ZipFile]::Open( $zipPath, 'Create' )

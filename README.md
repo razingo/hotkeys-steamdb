@@ -128,7 +128,7 @@ If SteamDB or Steam change that text, or show it in another language, the shortc
 | `options.html`, `options.css`, `options.js`, `tabs.js` | Settings page and toolbar popup |
 | `icons/` | Extension icons (16, 32, 48 and 128 px) |
 | `docs/` | Screenshots for this README (not part of the extension) |
-| `build.ps1` | Builds the ZIP for the browser stores in `dist/`: `powershell -ExecutionPolicy Bypass -File build.ps1` |
+| `build.ps1` | Builds the ZIP for the browser stores in `dist/` and removes older builds there: `powershell -ExecutionPolicy Bypass -File build.ps1` |
 | `tests/`, `playwright.config.js`, `package.json` | Automated tests (not part of the extension) |
 | `CHANGELOG.md` | What changed in each version |
 
