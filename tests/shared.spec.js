@@ -99,7 +99,7 @@ test( 'the quit key is only refused where it really quits', async( { page, brows
 
 // On a Mac, the system hides the app with Cmd + H and minimizes it with Cmd + M before the page sees either.
 // Neither this PC nor GitHub runs a Mac, so the page pretends to be one. shared.js reads the platform as it loads.
-test( 'on a Mac, Cmd + H, Cmd + M and Cmd + Q are refused', async( { page } ) =>
+test( 'on a Mac, Cmd + H, Cmd + M and Cmd + Q are refused, and warnings use the Mac\'s own keys', async( { page } ) =>
 {
 	await page.addInitScript( () => Object.defineProperty( Navigator.prototype, 'platform', { get: () => 'MacIntel' } ) );
 	await page.goto( 'https://extension.test/' );
@@ -109,6 +109,17 @@ test( 'on a Mac, Cmd + H, Cmd + M and Cmd + Q are refused', async( { page } ) =>
 	expect( await Check( page, { code: 'KeyH', mod: true } ) ).toMatchObject( { does: 'hide the browser', reserved: true } );
 	expect( await Check( page, { code: 'KeyM', mod: true } ) ).toMatchObject( { does: 'minimize the window', reserved: true } );
 	expect( await Check( page, { code: 'KeyQ', mod: true } ) ).toMatchObject( { does: 'quit the browser', reserved: true } );
+
+	// Warnings use the Mac's own meanings, from Chrome's Mac list, not the Windows ones
+	expect( await Check( page, { code: 'KeyY', mod: true } ) ).toMatchObject( { does: 'open your history' } );
+	expect( await Check( page, { code: 'KeyJ', mod: true, shift: true } ) ).toMatchObject( { does: 'open your downloads' } );
+	expect( await Check( page, { code: 'KeyI', mod: true, alt: true } ) ).toMatchObject( { does: 'open the developer tools' } );
+	expect( await Check( page, { code: 'BracketLeft', mod: true } ) ).toMatchObject( { does: 'go back' } );
+	expect( await Check( page, { code: 'Comma', mod: true } ) ).toMatchObject( { does: 'open the settings' } );
+
+	// Windows-only keys aren't warned about on a Mac
+	expect( await Check( page, { code: 'KeyJ', mod: true } ) ).toBeNull();
+	expect( await Check( page, { code: 'ArrowLeft', alt: true } ) ).toBeNull();
 } );
 
 test( 'elsewhere, Ctrl + H opens the history and Ctrl + M is free', async( { page } ) =>
@@ -117,6 +128,11 @@ test( 'elsewhere, Ctrl + H opens the history and Ctrl + M is free', async( { pag
 
 	expect( await Check( page, { code: 'KeyH', mod: true } ) ).toEqual( { keys: 'Mod+KeyH', does: 'open your history', when: true } );
 	expect( await Check( page, { code: 'KeyM', mod: true } ) ).toBeNull();
+
+	// And the Windows meanings of keys that do something else on a Mac
+	expect( await Check( page, { code: 'KeyY', mod: true } ) ).toMatchObject( { does: 'redo' } );
+	expect( await Check( page, { code: 'KeyJ', mod: true, shift: true } ) ).toMatchObject( { does: 'open the console' } );
+	expect( await Check( page, { code: 'Comma', mod: true } ) ).toBeNull();
 } );
 
 test( 'the default shortcuts don\'t clash with the browser', async( { page } ) =>

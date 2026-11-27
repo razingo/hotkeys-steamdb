@@ -35,7 +35,7 @@ It also works on the Steam store: on game pages, <kbd>W</kbd>, <kbd>E</kbd>, <kb
 - Over any other link to a game, <kbd>Q</kbd> opens its store page. On a game page, hovering over a different game makes the keys apply to that game instead of the page's.
 - The Steam store shortcuts can be turned off in the settings.
 - Shortcuts never fire while you're typing in a search box or other text field.
-- All shortcuts can be changed, including combinations such as <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Q</kbd>, or turned off.
+- All shortcuts can be changed, including combinations such as <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>Q</kbd>, or turned off.
 - Keys go by their physical position, so they work with any keyboard layout.
 - Each shortcut has a 1-second cooldown. Wishlist, Follow and both Ignore shortcuts share it, because each one sends a request to Steam and pressing keys quickly can get you temporarily blocked. A press during the cooldown is ignored and the button flashes amber.
 
@@ -86,8 +86,8 @@ See the [changelog](CHANGELOG.md).
 Click the extension's toolbar icon, or open its **Options** from the extensions page.
 
 - **Change a shortcut:** click it and press the new key or combination. <kbd>Esc</kbd> cancels.
-- **Turn a shortcut off:** press <kbd>Backspace</kbd> while it's waiting for a key, or click **×**.
-- **Browser shortcuts:** ones the browser keeps for itself, such as <kbd>Ctrl</kbd> + <kbd>T</kbd> or <kbd>Ctrl</kbd> + <kbd>W</kbd>, can't be used. Common ones such as <kbd>Ctrl</kbd> + <kbd>F</kbd> or <kbd>Space</kbd> can, but you'll see a warning: on SteamDB popups and the Steam store they do this extension's action instead of the browser's.
+- **Turn a shortcut off:** press <kbd>Backspace</kbd> or <kbd>Delete</kbd> while it's waiting for a key, or click **×**.
+- **Browser shortcuts:** ones the browser or your system keeps for itself, such as <kbd>Ctrl</kbd> + <kbd>T</kbd> or <kbd>Ctrl</kbd> + <kbd>W</kbd> (<kbd>Cmd</kbd> on a Mac), can't be used. Common ones such as <kbd>Ctrl</kbd> + <kbd>F</kbd> or <kbd>Space</kbd> can, but you'll see a warning: on SteamDB popups and the Steam store they do this extension's action instead of the browser's. The list knows the differences between Windows, Linux and Mac, and between Chrome and Firefox.
 - **Store page:** choose whether it opens in a background tab or switches to it.
 - **Also on the Steam store:** turn the shortcuts on Steam's own pages on or off.
 - **Sync settings between your browsers:** on by default, using your browser's sync when that's turned on. Turn it off to keep this browser's shortcuts to itself; the setting is per browser. When you turn it back on and the synced settings differ from this browser's, it asks which ones to keep.

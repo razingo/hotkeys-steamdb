@@ -2,9 +2,19 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.7
+## 1.5.8
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- On a Mac, the settings page's warnings described several keys by what they do on Windows. Cmd + Y, for example, was called "redo", but it opens your history on a Mac. The warnings now use the Mac's own keys, including ones it didn't know before, such as Cmd + Option + I for the developer tools.
+- Ctrl + Shift + M is described as Responsive Design Mode in Firefox, which is what it does there.
+- The settings page now mentions that Delete turns a shortcut off too, not just Backspace.
+
+## 1.5.7
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 
