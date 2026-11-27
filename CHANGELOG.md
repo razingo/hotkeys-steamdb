@@ -2,9 +2,17 @@
 
 What changed in each version. The newest is at the top.
 
-## 1.5.2
+## 1.5.3
 
 The first version for the browser stores. Needs Chrome 111 or newer (or Edge, Brave, Opera and other Chromium-based browsers of the same age), or Firefox 140 or newer.
+
+### Fixed
+
+- The note under "Also on the Steam store" in the settings named the default keys (W, E, R, T...), even after you'd changed your shortcuts. It now names the shortcuts instead.
+
+## 1.5.2
+
+Not published to the stores; available from GitHub.
 
 ### Fixed
 

@@ -144,6 +144,33 @@ test( 'every shortcut action has a default key and a cooldown group', () =>
 	expect( cooldowns.sort() ).toEqual( [ ...actions ].sort() );
 } );
 
+test( 'the README lists the same default keys as shared.js', () =>
+{
+	const shared = Read( 'shared.js' );
+	const readme = Read( 'README.md' );
+	const defaults = [ ...shared.match( /shortcuts: \{([\s\S]*?)\},/ )[ 1 ].matchAll( /PlainKey\( '(\w)' \)/g ) ].map( ( match ) => match[ 1 ] );
+
+	// The shortcut table, one row per key, in the same order as the settings page
+	const table = [ ...readme.matchAll( /^\| <kbd>(\w)<\/kbd> \|/gm ) ].map( ( match ) => match[ 1 ] );
+	expect( table ).toEqual( defaults );
+
+	// "Reset to defaults restores Q / W / E / R / T"
+	expect( readme ).toContain( `restores ${defaults.join( ' / ' )}` );
+
+	// The settings page names the shortcuts instead of keys, so it stays right after you change them.
+	// Its notes shouldn't mention any default key as a word of its own, like the "W, E, R and T" it once had.
+	const notes = [ ...Read( 'options.html' ).matchAll( /class="toggle-note[^"]*">([^<]*)</g ) ].map( ( match ) => match[ 1 ] );
+	expect( notes.length ).toBeGreaterThan( 0 );
+
+	for( const note of notes )
+	{
+		for( const key of defaults )
+		{
+			expect( note, `the note "${note}" names the key ${key}` ).not.toMatch( new RegExp( `\\b${key}\\b` ) );
+		}
+	}
+} );
+
 test( 'the changelog and the bug report form have the manifest\'s version', () =>
 {
 	expect( Read( 'CHANGELOG.md' ).match( /^## (\d+\.\d+\.\d+)/m )[ 1 ] ).toBe( manifest.version );

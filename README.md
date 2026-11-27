@@ -154,6 +154,7 @@ Around it (not part of the extension):
 - **A new shortcut action** in `shared.js` needs a default key there, a cooldown group in `content.js`, and a way for `content.js` to find its button.
 - **`build.ps1`** has the list of files that go into the ZIP. `tests/helpers.js` reads the same list, so the tests check exactly what ships.
 - **The version** lives in `manifest.json`. The newest heading in `CHANGELOG.md` and the version example in the bug report form have to match it.
+- **The default keys** live in `shared.js`. This README's shortcut table and its "Reset to defaults" line list them too. The settings page names the shortcuts rather than keys, so it stays right when you change them.
 
 `tests/package.spec.js` checks these links, so changing one side without the other fails the tests. The one it can't check is how `content.js` finds a new action's button; that needs its own tests on a mock page.
 
