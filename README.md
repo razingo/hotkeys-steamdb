@@ -6,7 +6,7 @@ Hover over a game, press a key, done. No more moving the mouse into the popup an
 
 It also works on the Steam store: on game pages, <kbd>W</kbd>, <kbd>E</kbd>, <kbd>R</kbd> and <kbd>T</kbd> press Steam's own Wishlist, Follow and Ignore buttons, and almost everywhere else on the store (the front page, store lists, recommendations, sale pages such as Specials) you can hover over a game and press <kbd>Q</kbd>, <kbd>W</kbd> or <kbd>R</kbd>. It does nothing on any other site.
 
-[![Tests](https://github.com/razingo/hotkeys-steamdb/actions/workflows/tests.yml/badge.svg)](https://github.com/razingo/hotkeys-steamdb/actions/workflows/tests.yml)
+[![Tests](https://github.com/razingo/hotkeys-steamdb/actions/workflows/tests.yml/badge.svg)](https://github.com/razingo/hotkeys-steamdb/actions/workflows/tests.yml) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/razingo)
 
 | With the [SteamDB extension](https://github.com/SteamDatabase/BrowserExtension) and a linked Steam account | Without them |
 |:---:|:---:|
